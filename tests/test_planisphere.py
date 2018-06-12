@@ -14,35 +14,35 @@ def test_room_paths():
     south = Room("South", "Test room in the south.")
 
     center.add_paths({'north': north, 'south': south})
-    go_north = Action(center, 'north')
-    assert go_north.go() == north
-    go_south = Action(center, 'south')
-    assert go_south.go() == south
+    go_north = Action(center, 'geh north')
+    assert go_north.determine_action() == north
+    go_south = Action(center, 'geh south')
+    assert go_south.determine_action() == south
 
-
-def test_map():
-    start = Room("Start", "You can go west and down a hole.")
-    west = Room("Trees", "There are trees here, you can go east.")
-    down = Room("Dungeon", "It's dark down here, you can go up.")
-
-    start.add_paths({'west': west})
-    west.add_paths({'east': start})
-    go_west = Action(start, 'west')
-    go_east_from_west = Action(go_west.go(), 'east')
-    assert go_west.go() == west
-    assert go_east_from_west.go() == start
 
 
 def test_david_map():
-    go_hallway = Action(davids_room, 'flur')
-    assert go_hallway.go() == hallway
-    go_outside = Action(hallway, 'raus')
-    assert go_outside.go() == outside
+    go_hallway = Action(davids_room, 'geh in den flur')
+    assert go_hallway.determine_action() == hallway
+    go_outside = Action(hallway, 'geh raus')
+    assert go_outside.determine_action() == outside
 
 def test_Action():
 
-    test_action = Action(davids_room, 'flur')
-    assert test_action.go() == hallway
+    test_action = Action(davids_room, 'geh in den flur')
+    assert test_action.determine_action() == hallway
+    test_action = Action(davids_room, 'geh in den flur')
+    test_action.scan_action()
+    assert test_action.verbs == ['go']
+    assert test_action.directions == ['flur']
+    assert test_action.verb_count == 1
+    assert test_action.object_count == 0
+    test_action = Action(davids_room, 'nimm und iss die pflanze')
+    result = test_action.determine_action()
+    assert result == "\nDu hast zu viele Verben angegeben: ['take', 'consume'].\nBitte schreib nur ein Verb statt 2!\n"
+    test_action = Action(davids_room, 'die pflanze!!!')
+    result = test_action.determine_action()
+    assert result == '\nDu hast kein bekanntes Verb in deinen Befehl geschrieben!\nBitte gib ein Verb an!\n'
 
 def test_object_names():
 

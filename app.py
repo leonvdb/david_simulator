@@ -28,12 +28,13 @@ def game():
         if room_name and action:
             room = planisphere.load_room(room_name)
             action_instance = planisphere.Action(room, action)
-            next_room = action_instance.go()
+            final_action = action_instance.determine_action()
+            print(">>>> final action", final_action)
 
-            if not next_room:
+            if action_instance.action_type != 'go':
                 session['room_name'] = planisphere.name_room(room)
             else:
-                session['room_name'] = planisphere.name_room(next_room)
+                session['room_name'] = planisphere.name_room(final_action)
 
         return redirect(url_for("game"))
 

@@ -1,3 +1,6 @@
+from david_web import lexicon
+from textwrap import dedent
+
 class Room(object):
 
     instances = []
@@ -24,16 +27,102 @@ class Action(object):
     def __init__(self, current_room, action):
         self.current_room = current_room
         self.action = action
+        self.verbs = []
+        self.directions = []
+        self.objects = []
+        self.verb_count = 0
+        self.direction_count = 0
+        self.object_count = 0
+        self.action_type = ''
 
-    def parse_action(self):
+    def scan_action(self):
+        scanned_action = lexicon.scan(self.action)
+        print(">>>> scanned_action:", scanned_action)
 
-        parsed_action = self.action
-        return parsed_action
+        for i in scanned_action:
+
+            if i[0] == 'verb':
+                self.verb_count += 1
+                self.verbs.append(i[1])
+            elif i[0] == 'direction':
+                self.direction_count += 1
+                self.directions.append(i[1])
+            elif i[0] == 'object':
+                self.object_count += 1
+                self.objects.append(i[1])
+
+    def determine_action(self):
+
+        self.scan_action()
+
+        if self.verb_count > 1:
+            return self.error('too many verbs')
+        elif self.verb_count < 1:
+            return self.error('no verbs')
+        elif self.direction_count > 1:
+            return self.error('too many directions')
+        elif 'go' in self.verbs:
+            return self.go()
+
+        else:
+            pass
+
+
+        #Errors for: verb_count != 1, direction_count > 1
+
+
+    def error(self, reason):
+        self.action_type = 'error'
+        message = ''
+        if reason == 'too many verbs':
+            message = dedent(f"""
+            Du hast zu viele Verben angegeben: {self.verbs}.
+            Bitte schreib nur ein Verb statt {self.verb_count}!
+            """)
+        elif reason == 'no verbs':
+            message = dedent(f"""
+            Du hast kein bekanntes Verb in deinen Befehl geschrieben!
+            Bitte gib ein Verb an!
+            """)
+        elif reason == 'too many directions':
+            message = dedent(f"""
+            Du hast zu viele Richtungen angegeben: {self.directions}
+            Bitte schreib nur eine Richtung statt {self.direction_count}
+            """)
+        elif reason == 'no direction':
+            message = dedent(f"""
+            Du hast keine bekannte Richtung in deinen Befehl geschrieben!
+            Bitte gib eine Richtung an wenn du dich bewegen möchtest!
+            """)
+        else:
+            message = "Unknown Error."
+
+        return message
+
+    def take(self):
+        pass
+
+    def attack(self):
+        pass
+
+    def consume(self):
+        pass
+
+    def pass_action(self):
+
+        passed_action = self.action
+        return passed_action
 
 
     def go(self):
 
-        return self.current_room.get_path(self.parse_action())
+        if self.directions:
+            self.action_type = 'go'
+            return self.current_room.get_path(self.directions[0])
+        else:
+            return self.error('no direction')
+
+
 
 davids_room = Room("Davids Room",
 """

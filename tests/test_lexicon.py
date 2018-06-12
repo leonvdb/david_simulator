@@ -15,8 +15,10 @@ def test_importing_names():
 def test_lexicon_results():
 
     result = scan('ich eat pflanze in   davidszimmer')
-    assert result == [('error', 'ich'), ('verb', 'eat'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'davidszimmer')]
+    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'davidszimmer')]
     result = scan('ich eat pflanze in   eingangsbereich')
-    assert result == [('error', 'ich'), ('verb', 'eat'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'flur')]
+    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'flur')]
     result = scan('ich eat pflanze in   davids zimmer lololol!')
-    assert result == [('error', 'ich'), ('verb', 'eat'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'davidszimmer'), ('error','lololol')]
+    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'pflanze'), ('stop', 'in'), ('direction', 'davidszimmer'), ('error','lololol')]
+    result = scan('iss die pflanze auf!')
+    assert result == [('verb', 'consume'), ('error', 'die'), ('object', 'pflanze'), ('error', 'auf')]
