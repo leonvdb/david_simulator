@@ -6,6 +6,7 @@ class Room(object):
         self.name = name
         self.description = description
         self.paths = {}
+        self.object_names = []
         Room.instances.append(self)
 
     def get_path(self, action):
@@ -14,6 +15,9 @@ class Room(object):
 
     def add_paths(self, paths):
         self.paths.update(paths)
+
+    def add_object_names(self, object_name_list):
+        self.object_names.extend(object_name_list)
 
 class Action(object):
 
@@ -73,17 +77,18 @@ Description of Death
 """)
 
 davids_room.add_paths({
-    'in den flur' : hallway
+    'flur' : hallway
 })
 
+davids_room.add_object_names(['pflanze', 'scalpell'])
+
 hallway.add_paths({
-    'davids zimmer' : davids_room,
-    'leons zimmer' : leons_room,
+    'davidszimmer' : davids_room,
+    'leonszimmer' : leons_room,
     'raus' : outside,
     'wohnzimmer' : living_room,
-    'Küche' : kitchen,
-    'Badezimmer' : bathroom,
-    'selbstmord' : death
+    'küche' : kitchen,
+    'badezimmer' : bathroom
 
 })
 

@@ -1,30 +1,33 @@
 from david_web import planisphere
-
+from david_web import lexicon_resources
 class LexcionError(Exception):
     pass
 
 def collect_names(category_name):
-    all_direction_names = []
+    all_collected_names = []
     instance_names = planisphere.Room.instances
     if category_name == 'paths':
 
         for instance in instance_names:
 
-            all_direction_names.extend(list(instance.paths))
+            all_collected_names.extend(list(instance.paths))
+
+        return set(all_collected_names)
+
+    elif category_name == 'objects':
+
+        for instance in instance_names:
+
+            all_collected_names.extend(instance.object_names)
+
+        return set(all_collected_names)
+
     else:
         raise LexcionError(f"""
         Expected a different category. This category has been given:
         {category_name}
         """)
 
-    return set(all_direction_names)
-
-#TESTING GOING ON HERE!
-directions_imported = collect_names('paths')
-directions_synonyms = ['test']
-
-direction_names = list(directions_imported) + directions_synonyms
-####################
 
 def clean(sentence):
 
@@ -38,40 +41,57 @@ def clean(sentence):
 
 
     return result
+def replace_synonyms(sentence):
+    replaced = []
+    clean_words = clean(sentence)
+    position = 0
+    for i in clean_words:
+        if position < len(clean_words)-1:
+            next_word = clean_words[position+1]
+        else:
+            next_word = None
+
+        if i in lexicon_resources.two_word_names and next_word in lexicon_resources.two_word_names[i]:
+            replace = lexicon_resources.two_word_names[i][next_word]
+            replaced.append(replace)
+            clean_words.pop(position+1)
+
+
+        else:
+            replace = lexicon_resources.synonyms_dict.get(i, i)
+            replaced.append(replace)
+
+        position += 1
+
+    return replaced
 
 def scan(sentence):
     #clean_words are used for scanning, original_words will be matched to type
-    original_words = sentence.split()
-    clean_words = clean(sentence)
+    clean_words = replace_synonyms(sentence)
+    direction_names = collect_names('paths')
+    object_names = collect_names('objects')
+    verb_names = lexicon_resources.verb_names
+    stop_names = lexicon_resources.stop_names
+    matches_clean = []
 
-    directions_imported = collect_names('paths')
-    directions_synonyms = ['test']
+    for i in clean_words:
 
-    direction_names = list(directions_imported) + directions_synonyms
+        if i in direction_names:
+            matches_clean.append(('direction', i))
 
-    verb_names = ['go', 'kill', 'eat']
-    stop_names = ['the', 'in', 'of', 'to']
-    noun_names = ['bear', 'princess']
-    matches = []
+        elif i in verb_names:
+            matches_clean.append(('verb', i))
 
-    for i, j in zip(original_words, clean_words):
+        elif i in stop_names:
+            matches_clean.append(('stop', i))
 
-        if j in direction_names:
-            matches.append(('direction', i))
-
-        elif j in verb_names:
-            matches.append(('verb', i))
-
-        elif j in stop_names:
-            matches.append(('stop', i))
-
-        elif j in noun_names:
-            matches.append(('noun', i))
+        elif i in object_names:
+            matches_clean.append(('object', i))
 
         else:
             try:
-                matches.append(('number', int(i)))
+                matches_clean.append(('number', int(i)))
             except ValueError:
-                matches.append(('error', i))
+                matches_clean.append(('error', i))
 
-    return matches
+    return matches_clean

@@ -29,15 +29,15 @@ def test_game(client):
     print(">>>> client.get(room_name)", client.get('room_name'))
     assert b"Davids Room" in rv.data
 
-    data = {'action': 'in den flur'}
+    data = {'action': 'flur'}
     rv = client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"Hallway" in rv.data
 
-    data = {'action': 'selbstmord'}
+    data = {'action': 'raus'}
     rv = client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
-    assert b"Death" in rv.data
+    assert b"Outside" in rv.data
 
 # def test_back_home(client):
 #

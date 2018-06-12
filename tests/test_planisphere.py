@@ -34,12 +34,18 @@ def test_map():
 
 
 def test_david_map():
-    go_hallway = Action(davids_room, 'in den flur')
+    go_hallway = Action(davids_room, 'flur')
     assert go_hallway.go() == hallway
-    suicide = Action(hallway, 'selbstmord')
-    assert suicide.go() == death
+    go_outside = Action(hallway, 'raus')
+    assert go_outside.go() == outside
 
 def test_Action():
 
-    test_action = Action(davids_room, 'in den flur')
+    test_action = Action(davids_room, 'flur')
     assert test_action.go() == hallway
+
+def test_object_names():
+
+    test_scene = Room("Name", "Description")
+    test_scene.add_object_names(['object_1', 'object_2'])
+    assert test_scene.object_names == ['object_1', 'object_2']
