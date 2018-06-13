@@ -1,0 +1,1 @@
+takeable = ['pflanze', 'scalpell']

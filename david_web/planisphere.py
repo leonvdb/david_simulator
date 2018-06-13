@@ -1,4 +1,6 @@
 from david_web import lexicon
+from david_web import action_combinations
+from david_web import gamestate
 from textwrap import dedent
 
 class Room(object):
@@ -63,7 +65,12 @@ class Action(object):
             return self.error('too many directions')
         elif 'go' in self.verbs:
             return self.go()
-
+        elif 'consume' in self.verbs:
+            return self.consume()
+        elif 'attack' in self.verbs:
+            return self.attack()
+        elif 'take' in self.verbs:
+            return self.take()
         else:
             pass
 
@@ -86,7 +93,7 @@ class Action(object):
             """)
         elif reason == 'too many directions':
             message = dedent(f"""
-            Du hast zu viele Richtungen angegeben: {self.directions}
+            Du hast zu viele Richtungen angegeben: {self.directions}.
             Bitte schreib nur eine Richtung statt {self.direction_count}
             """)
         elif reason == 'no direction':
@@ -94,13 +101,51 @@ class Action(object):
             Du hast keine bekannte Richtung in deinen Befehl geschrieben!
             Bitte gib eine Richtung an wenn du dich bewegen möchtest!
             """)
+        elif reason == 'direction unavailable':
+            message = dedent(f"""
+            Du hast kannst das angegebene Ziel von hier nicht erreichen.
+            """)
+        elif reason == 'no take objects':
+            message = dedent(f"""
+            Du hast keinen bekannten Gegenstand angegeben.
+            Bitte gib ein Objekt an das du aufnehmen möchtest.
+            """)
+        elif reason == 'too many take objects':
+            message = dedent(f"""
+            Du hast zu viele Objekte angegeben: {self.objects}.
+            Du kannst nur ein Objekt gleichzeitig aufnehmen und nicht {self.object_count}
+            """)
+        elif reason == 'object not in room':
+            message = dedent(f"""
+            Das angegebene objekt \"{self.objects[0]}\" befindet sich nicht in diesem Bereich.
+            Leider kannst du es also nicht aufnehmen...
+            """)
+        elif reason == 'object not takeable':
+            message = dedent(f"""
+            Das angegebene objekt \"{self.objects[0]}\" kannst du leider nicht aufnehmen.
+            """)
         else:
             message = "Unknown Error."
 
         return message
 
     def take(self):
-        pass
+        self.action_type = 'take'
+        if self.object_count < 1:
+            return self.error('no take objects')
+        elif self.object_count > 1:
+            return self.error('too many take objects')
+        elif self.objects[0] not in self.current_room.object_names:
+            return self.error('object not in room')
+        elif self.objects[0] not in action_combinations.takeable:
+            return self.error('object not takeable')
+        else:
+            position_in_room = self.current_room.object_names.index(self.objects[0])
+            self.current_room.object_names.pop(position_in_room)
+            gamestate.inventory.append(self.objects[0])
+            return dedent(f"""
+            Das Objekt \"{self.objects[0]}\" wurde deinem Inventar hinzugefügt!
+            """)
 
     def attack(self):
         pass
@@ -108,17 +153,14 @@ class Action(object):
     def consume(self):
         pass
 
-    def pass_action(self):
-
-        passed_action = self.action
-        return passed_action
-
-
     def go(self):
 
         if self.directions:
             self.action_type = 'go'
-            return self.current_room.get_path(self.directions[0])
+            if self.directions[0] in list(self.current_room.paths.keys()):
+                return self.current_room.get_path(self.directions[0])
+            else:
+                return self.error('direction unavailable')
         else:
             return self.error('no direction')
 
@@ -169,7 +211,7 @@ davids_room.add_paths({
     'flur' : hallway
 })
 
-davids_room.add_object_names(['pflanze', 'scalpell'])
+davids_room.add_object_names(['pflanze', 'scalpell', 'bett'])
 
 hallway.add_paths({
     'davidszimmer' : davids_room,

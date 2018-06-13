@@ -1,3 +1,4 @@
 .DS_Store
 *.pyc
 .pytest_cache
+to_do_list.txt
