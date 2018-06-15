@@ -1,7 +1,9 @@
 from david_web import lexicon
+from david_web import error_messages
 from david_web import action_combinations
 from david_web import gamestate
 from textwrap import dedent
+
 
 class Room(object):
 
@@ -17,12 +19,12 @@ class Room(object):
     def get_path(self, action):
         return self.paths.get(action, None)
 
-
     def add_paths(self, paths):
         self.paths.update(paths)
 
     def add_object_names(self, object_name_list):
         self.object_names.extend(object_name_list)
+
 
 class Action(object):
 
@@ -39,7 +41,6 @@ class Action(object):
 
     def scan_action(self):
         scanned_action = lexicon.scan(self.action)
-        print(">>>> scanned_action:", scanned_action)
 
         for i in scanned_action:
 
@@ -71,63 +72,33 @@ class Action(object):
             return self.attack()
         elif 'take' in self.verbs:
             return self.take()
+        elif 'gamestate' in self.verbs:
+            return self.gamestate()
         else:
             pass
 
-
-        #Errors for: verb_count != 1, direction_count > 1
-
+        # Errors for: verb_count != 1, direction_count > 1
 
     def error(self, reason):
         self.action_type = 'error'
-        message = ''
-        if reason == 'too many verbs':
-            message = dedent(f"""
-            Du hast zu viele Verben angegeben: {self.verbs}.
-            Bitte schreib nur ein Verb statt {self.verb_count}!
-            """)
-        elif reason == 'no verbs':
-            message = dedent(f"""
-            Du hast kein bekanntes Verb in deinen Befehl geschrieben!
-            Bitte gib ein Verb an!
-            """)
-        elif reason == 'too many directions':
-            message = dedent(f"""
-            Du hast zu viele Richtungen angegeben: {self.directions}.
-            Bitte schreib nur eine Richtung statt {self.direction_count}
-            """)
-        elif reason == 'no direction':
-            message = dedent(f"""
-            Du hast keine bekannte Richtung in deinen Befehl geschrieben!
-            Bitte gib eine Richtung an wenn du dich bewegen möchtest!
-            """)
-        elif reason == 'direction unavailable':
-            message = dedent(f"""
-            Du hast kannst das angegebene Ziel von hier nicht erreichen.
-            """)
-        elif reason == 'no take objects':
-            message = dedent(f"""
-            Du hast keinen bekannten Gegenstand angegeben.
-            Bitte gib ein Objekt an das du aufnehmen möchtest.
-            """)
-        elif reason == 'too many take objects':
-            message = dedent(f"""
-            Du hast zu viele Objekte angegeben: {self.objects}.
-            Du kannst nur ein Objekt gleichzeitig aufnehmen und nicht {self.object_count}
-            """)
-        elif reason == 'object not in room':
-            message = dedent(f"""
-            Das angegebene objekt \"{self.objects[0]}\" befindet sich nicht in diesem Bereich.
-            Leider kannst du es also nicht aufnehmen...
-            """)
-        elif reason == 'object not takeable':
-            message = dedent(f"""
-            Das angegebene objekt \"{self.objects[0]}\" kannst du leider nicht aufnehmen.
-            """)
-        else:
-            message = "Unknown Error."
+
+        message = dedent(error_messages.return_error_message(reason))
+        message = message.format(verbs=self.verbs, verb_count=self.verb_count,
+                                 objects=self.objects, object_count=self.object_count,
+                                 directions=self.directions, direction_count=self.direction_count)
 
         return message
+
+    def gamestate(self):
+        lp = gamestate.character_stats.get('Health')
+        ap = gamestate.character_stats.get('Attack_Points')
+        invetory_str = ','.join(gamestate.inventory)
+
+        return dedent(f"""
+        Lebenspunkte: {lp}
+        Angriffspunkte: {ap}
+        Inventar: {invetory_str}
+        """)
 
     def take(self):
         self.action_type = 'take'
@@ -148,7 +119,44 @@ class Action(object):
             """)
 
     def attack(self):
-        pass
+        self.action_type = 'attack'
+        if self.object_count > 1:
+            return self.error('too many opponents')
+        elif self.object_count < 1:
+            return self.error('no opponents')
+        elif self.objects[0] not in self.current_room.object_names:
+            return self.error('opponent not in room')
+        elif self.objects[0] not in list(gamestate.opponents.keys()):
+            return self.error('object not attackable')
+        else:
+
+            opp_data = gamestate.opponents.get(self.objects[0])
+            opp_lp = opp_data.get('lp')
+            if opp_lp <= 0:
+                return self.error('opponent already dead')
+
+            else:
+                opp_ap = opp_data.get('ap')
+                david_ap = gamestate.character_stats.get('Attack_Points')
+                david_lp = gamestate.character_stats.get('Health')
+                gamestate.opponents[self.objects[0]]['lp'] = opp_lp - david_ap
+                gamestate.character_stats['Health'] = david_lp - opp_ap
+                # get updated data
+                opp_data = gamestate.opponents.get(self.objects[0])
+                opp_lp = opp_data.get('lp')
+                david_lp = gamestate.character_stats.get('Health')
+                message = f"""
+                David im Kampf gegen {self.objects[0]}!
+                David fügt {self.objects[0]} {david_ap} Schaden zu.
+                {self.objects[0]} hat noch {opp_lp} Lebenspunkte.
+                {self.objects[0]} fügt David {opp_ap} Schaden zu.
+                David hat noch {david_lp} Lebenspunkte.
+                """
+                if opp_lp <= 0:
+                    message = message + f"""
+                    Du hast {self.objects[0]} besiegt!
+                    """
+                return message
 
     def consume(self):
         pass
@@ -165,70 +173,69 @@ class Action(object):
             return self.error('no direction')
 
 
-
 davids_room = Room("Davids Room",
-"""
+                   """
 Description of Davids ugly room
 """)
 
 hallway = Room("Hallway",
-"""
+               """
 Description of the Hallway
 """)
 
 leons_room = Room("Leons Room",
-"""
+                  """
 Description of Leons Room
 """)
 
 
 outside = Room("Outside",
-"""
+               """
 Description of Outside
 """)
 
 living_room = Room("Living Room",
-"""
+                   """
 Description of Living Room
 """)
 
 kitchen = Room("Kitchen",
-"""
+               """
 Description of Kitchen
 """)
 
 bathroom = Room("Bathroom",
-"""
+                """
 Description of Bathroom
 """)
 
 death = Room("Death",
-"""
+             """
 Description of Death
 """)
 
 davids_room.add_paths({
-    'flur' : hallway
+    'flur': hallway
 })
 
 davids_room.add_object_names(['pflanze', 'scalpell', 'bett'])
 
 hallway.add_paths({
-    'davidszimmer' : davids_room,
-    'leonszimmer' : leons_room,
-    'raus' : outside,
-    'wohnzimmer' : living_room,
-    'küche' : kitchen,
-    'badezimmer' : bathroom
+    'davidszimmer': davids_room,
+    'leonszimmer': leons_room,
+    'raus': outside,
+    'wohnzimmer': living_room,
+    'küche': kitchen,
+    'badezimmer': bathroom
 
 })
 
 leons_room.add_paths({
-    'flur' : hallway
+    'flur': hallway
 })
 
 outside.add_paths({
-    'haus' : hallway
+    'haus': hallway
 })
 
 living_room.add_paths({
@@ -243,13 +250,18 @@ bathroom.add_paths({
     'flur': hallway
 })
 
+bathroom.add_object_names(['monster', 'b12', 'toilette'])
+
 
 START = 'davids_room'
+objects_from_rooms = lexicon.collect_names('objects')
+directions_from_rooms = lexicon.collect_names('paths')
 
 
 def load_room(name):
 
     return globals().get(name)
+
 
 def name_room(room):
 

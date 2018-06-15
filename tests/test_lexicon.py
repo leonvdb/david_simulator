@@ -10,7 +10,7 @@ def test_importing_names():
     paths_collection = collect_names('paths')
     assert 'flur' in paths_collection
     objects_collection = collect_names('objects')
-    assert 'pflanze' in objects_collection
+    assert 'bett' in objects_collection
 
 def test_lexicon_results():
 

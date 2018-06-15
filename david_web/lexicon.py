@@ -1,7 +1,10 @@
 from david_web import planisphere
 from david_web import lexicon_resources
+
+
 class LexcionError(Exception):
     pass
+
 
 def collect_names(category_name):
     all_collected_names = []
@@ -39,8 +42,9 @@ def clean(sentence):
         no_exclamation = no_question.replace("!", "")
         result.append(no_exclamation.lower())
 
-
     return result
+
+
 def replace_synonyms(sentence):
     replaced = []
     clean_words = clean(sentence)
@@ -56,7 +60,6 @@ def replace_synonyms(sentence):
             replaced.append(replace)
             clean_words.pop(position+1)
 
-
         else:
             replace = lexicon_resources.synonyms_dict.get(i, i)
             replaced.append(replace)
@@ -65,11 +68,12 @@ def replace_synonyms(sentence):
 
     return replaced
 
+
 def scan(sentence):
-    #clean_words are used for scanning, original_words will be matched to type
+    # clean_words are used for scanning, original_words will be matched to type
     clean_words = replace_synonyms(sentence)
-    direction_names = collect_names('paths')
-    object_names = collect_names('objects')
+    direction_names = planisphere.directions_from_rooms
+    object_names = planisphere.objects_from_rooms
     verb_names = lexicon_resources.verb_names
     stop_names = lexicon_resources.stop_names
     matches_clean = []

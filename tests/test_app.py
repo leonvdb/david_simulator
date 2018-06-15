@@ -1,7 +1,9 @@
 from app import app
 from david_web import planisphere
+from david_web import gamestate
 
 import pytest
+
 
 @pytest.fixture(scope='session')
 def client():
@@ -10,6 +12,7 @@ def client():
     client = app.test_client()
 
     yield client
+
 
 @pytest.fixture()
 def new_client():
@@ -42,7 +45,6 @@ def test_game(client):
     assert b"Outside" in rv.data
 
 
-
 def test_back_home(new_client):
 
     new_client.get('/', follow_redirects=True)
@@ -51,10 +53,52 @@ def test_back_home(new_client):
     assert rv.status_code, 200
     assert b"Davids Room" in rv.data
 
+    data = {'action': 'greif die pflanze an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'kannst du nicht' in rv.data
+
+    data = {'action': 'greif das bett an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'besiegt' in rv.data
+
+    data = {'action': 'greif das bett an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'nicht nochmal' in rv.data
+
     data = {'action': 'geh in den flur'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"Hallway" in rv.data
+
+    data = {'action': 'greif das monster an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'in diesem Raum'in rv.data
+
+    data = {'action': 'geh in das badezimmer'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b"Bathroom" in rv.data
+
+    data = {'action': 'greif das monster an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert gamestate.character_stats.get('Health') == 80
+    assert b'David hat noch 80' in rv.data
+
+# def test_take(new_client):
+#
+#     #Fix this!!
+#     new_client.get('/', follow_redirects=True)
+#
+#     data = {'action': 'nimm die pflanze'}
+#     rv = new_client.post('/game', follow_redirects=True, data=data)
+#     assert rv.status_code == 200
+#     assert b"pflanze" in rv.data
+
 
 def test_errors(new_client):
 

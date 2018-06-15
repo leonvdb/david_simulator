@@ -1,1 +1,1 @@
-takeable = ['pflanze', 'scalpell']
+takeable = ['pflanze', 'scalpell', 'b12']

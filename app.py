@@ -1,8 +1,10 @@
 from flask import Flask, session, redirect, url_for, escape, request
 from flask import render_template
 from david_web import planisphere
+from david_web import gamestate
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def index():
@@ -11,12 +13,19 @@ def index():
     session['final_action'] = False
     return redirect(url_for("game"))
 
+
 @app.route("/game", methods=['GET', 'POST'])
 def game():
+    session['lifepoints'] = gamestate.character_stats.get('Health')
     action_name = session.get('final_action')
     room_name = session.get('room_name')
+    david_lp = session.get('lifepoints')
 
     if request.method == "GET":
+
+        if david_lp <= 0:
+            return render_template("you_died.html")
+
         if room_name:
             room = planisphere.load_room(room_name)
             return render_template("show_room.html", room=room, action_name=action_name)
@@ -40,7 +49,6 @@ def game():
                 session['final_action'] = False
 
         return redirect(url_for("game"))
-
 
 
 app.secret_key = 'uYstR*b27j6w7EztZl@1MH#Xtr0LkD'
