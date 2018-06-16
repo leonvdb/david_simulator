@@ -42,6 +42,9 @@ def test_Action():
     test_action = Action(davids_room, 'geh in die Küche')
     result = test_action.determine_action()
     assert result == '\nDu hast kannst das angegebene Ziel von hier nicht erreichen.\n'
+    test_action = Action(davids_room, 'greif das bett mit dem scalpell an')
+    result = test_action.determine_action()
+    assert test_action.with_action == True
 
 
 def test_take():

@@ -1,6 +1,6 @@
 from david_web import lexicon
 from david_web import error_messages
-from david_web import action_combinations
+from david_web import action_resources
 from david_web import gamestate
 from textwrap import dedent
 
@@ -38,6 +38,7 @@ class Action(object):
         self.direction_count = 0
         self.object_count = 0
         self.action_type = ''
+        self.with_action = False
 
     def scan_action(self):
         scanned_action = lexicon.scan(self.action)
@@ -53,6 +54,8 @@ class Action(object):
             elif i[0] == 'object':
                 self.object_count += 1
                 self.objects.append(i[1])
+            elif i[1] == 'with':
+                self.with_action = True
 
     def determine_action(self):
 
@@ -108,7 +111,7 @@ class Action(object):
             return self.error('too many take objects')
         elif self.objects[0] not in self.current_room.object_names:
             return self.error('object not in room')
-        elif self.objects[0] not in action_combinations.takeable:
+        elif self.objects[0] not in action_resources.takeable:
             return self.error('object not takeable')
         else:
             position_in_room = self.current_room.object_names.index(self.objects[0])
@@ -159,7 +162,48 @@ class Action(object):
                 return message
 
     def consume(self):
-        pass
+        self.action_type = 'consume'
+        if self.object_count > 1:
+            return self.error('too many food objects')
+        elif self.object_count < 1:
+            return self.error('no food objects')
+        elif self.objects[0] not in self.current_room.object_names and self.objects[0] not in gamestate.inventory:
+            return self.error('food object not available')
+        elif self.objects[0] not in list(action_resources.consumable_objects.keys()):
+            return self.error('food object not consumable')
+        else:
+            if self.objects[0] in gamestate.inventory:
+                position_in_inventory = gamestate.inventory.index(self.objects[0])
+                gamestate.inventory.pop(position_in_inventory)
+            elif self.objects[0] in self.current_room.object_names:
+                position_in_room = self.current_room.object_names.index(self.objects[0])
+                self.current_room.object_names.pop(position_in_room)
+            david_ap = gamestate.character_stats.get('Attack_Points')
+            david_lp = gamestate.character_stats.get('Health')
+            consumable_data = action_resources.consumable_objects.get(self.objects[0])
+            consumable_ap = consumable_data.get('ap')
+            consumable_lp = consumable_data.get('lp')
+            consumable_special = consumable_data.get('special')
+
+            message = f"""
+            David konsumiert {self.objects[0]}
+            """
+            if consumable_ap != 0:
+                gamestate.character_stats['Attack_Points'] = david_ap + consumable_ap
+                message = message + f"""
+                David bekommt {consumable_ap} Angriffspunkte von {self.objects[0]}.
+                """
+            if consumable_lp != 0:
+                gamestate.character_stats['Health'] = david_lp + consumable_lp
+                message = message + f"""
+                David bekommt {consumable_lp} Lebenspunkte von {self.objects[0]}.
+                """
+            if consumable_special != None:
+                gamestate.states.append(consumable_special)
+                message = message + f"""
+                David erhät neuen Status {consumable_special}.
+                """
+            return message
 
     def go(self):
 
@@ -218,7 +262,7 @@ davids_room.add_paths({
     'flur': hallway
 })
 
-davids_room.add_object_names(['pflanze', 'scalpell', 'bett'])
+davids_room.add_object_names(['pflanze', 'scalpell', 'bett', 'salat'])
 
 hallway.add_paths({
     'davidszimmer': davids_room,

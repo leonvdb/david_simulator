@@ -1,4 +1,7 @@
 synonyms_dict = {
+    ### STOP SYNONYMS ###
+    'mit': 'with',
+    'using': 'with',
     ### DIRECTION SYNONYMS ###
     'eingangsbereich': 'flur',
     ### VERB SYNONYMS GERMAN ###

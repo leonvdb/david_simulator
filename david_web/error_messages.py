@@ -54,7 +54,21 @@ def return_error_message(reason):
     """,
         'opponent already dead': """
     Der Gegner \"{objects[0]}\" ist bereits besiegt. Du kannst ihn nicht nochmal angrefen.
-    """
+    """,
+        'too many food objects': """
+    Du hast zu viele Objekte angegeben die du konsumieren möchtest: {objects}.
+    Du kannst nur ein Objekt gleichzeitig konsumieren und nicht {object_count}.
+        """,
+        'no food objects': """
+    Du hast kein bekanntes Objekt angegeben, dass du konsumieren möchtest.
+    Bitte gib einen konsumierbaren Gegenstand an.
+        """,
+        'food object not available': """
+    Das Objekt, dass du konsumieren möchtest befindet sich weder in diesem Raum, noch in deinem Inventar.
+        """,
+        'food object not consumable': """
+    Das Objekt \"{objects[0]}\" kannst du nicht konsumieren.
+        """
     }
 
     message = error_messages.get(reason)

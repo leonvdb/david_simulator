@@ -4,6 +4,7 @@ character_stats = {
 }
 
 inventory = []
+states = []
 
 opponents = {'monster': {'ap': 20, 'lp': 140},
              'bett': {'ap': 0, 'lp': 10}}

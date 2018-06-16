@@ -23,6 +23,15 @@ def new_client():
     yield client
 
 
+@pytest.fixture()
+def new_client2():
+
+    app.config['TESTING'] = True
+    client = app.test_client()
+
+    yield client
+
+
 def test_index(client):
     rv = client.get('/', follow_redirects=True)
     assert rv.status_code == 200
@@ -58,6 +67,15 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b'kannst du nicht' in rv.data
 
+    data = {'action': 'nimm den salat'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+
+    data = {'action': 'iss das bett auf'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'kannst du nicht konsumieren' in rv.data
+
     data = {'action': 'greif das bett an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -72,6 +90,11 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"Hallway" in rv.data
+
+    data = {'action': 'iss das scalpell auf'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'befindet sich weder in diesem Raum' in rv.data
 
     data = {'action': 'greif das monster an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
@@ -89,13 +112,40 @@ def test_back_home(new_client):
     assert gamestate.character_stats.get('Health') == 80
     assert b'David hat noch 80' in rv.data
 
-# def test_take(new_client):
+    data = {'action': 'iss den salat auf'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert gamestate.character_stats.get('Health') == 90
+    assert 'vegan' in gamestate.states
+    assert 'salat' not in gamestate.inventory
+
+    data = {'action': 'iss den salat auf'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert gamestate.character_stats.get('Health') == 90
+    assert 'vegan' in gamestate.states
+    assert 'salat' not in gamestate.inventory
+    assert 'b12' in planisphere.bathroom.object_names
+
+    data = {'action': 'iss das B12'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert gamestate.character_stats.get('Health') == 110
+    assert gamestate.character_stats.get('Attack_Points') == 30
+    assert 'b12' not in planisphere.bathroom.object_names
+
+
+# def test_take(new_client2):
 #
-#     #Fix this!!
-#     new_client.get('/', follow_redirects=True)
+#     # Fix this!!
+#     new_client2.get('/', follow_redirects=True)
+#
+#     rv = new_client2.get('/game', follow_redirects=True)
+#     assert rv.status_code, 200
+#     assert b"Davids Room" in rv.data
 #
 #     data = {'action': 'nimm die pflanze'}
-#     rv = new_client.post('/game', follow_redirects=True, data=data)
+#     rv = new_client2.post('/game', follow_redirects=True, data=data)
 #     assert rv.status_code == 200
 #     assert b"pflanze" in rv.data
 
