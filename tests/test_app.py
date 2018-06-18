@@ -1,4 +1,5 @@
 from app import app
+import os
 from david_web import planisphere
 from david_web import gamestate
 
@@ -17,6 +18,7 @@ def client():
 @pytest.fixture()
 def new_client():
 
+    # os.environ['TESTING'] = True
     app.config['TESTING'] = True
     client = app.test_client()
 
@@ -67,6 +69,14 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b'kannst du nicht' in rv.data
 
+    data = {'action': 'bau einen build_test'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'erfolgreich' in rv.data
+    assert 'build_test' in gamestate.inventory
+    assert 'ingredient1' not in gamestate.inventory
+    assert 'ingredient2' not in planisphere.davids_room.object_names
+
     data = {'action': 'nimm den salat'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -76,10 +86,13 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b'kannst du nicht konsumieren' in rv.data
 
-    data = {'action': 'greif das bett an'}
+    data = {'action': 'greif das bett mit dem scalpell an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b'besiegt' in rv.data
+    assert b'gemuetlich' in rv.data
+    assert b'35' in rv.data
+    assert 'müde' in gamestate.states
 
     data = {'action': 'greif das bett an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

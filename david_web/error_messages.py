@@ -68,7 +68,20 @@ def return_error_message(reason):
         """,
         'food object not consumable': """
     Das Objekt \"{objects[0]}\" kannst du nicht konsumieren.
-        """
+        """,
+        'not a valid weapon': """
+    Das Objekt \"{objects[1]}\" kannst du nicht als Waffe benutzen.
+        """,
+        'no build objects': """
+    Du hast kein bekannstes Objekt angegeben, dass du bauen kannst.
+        """,
+        'too many build objects': """
+    Du hast zu viele Objekte angegeben die du bauen möchtest: {objects}.
+    Du kannst nur ein Objekt gleichzeitig bauen und nicht {object_count}.
+        """,
+        'object not buildable': """
+    Das Objekt \"{objects[0]}\" kannst du nicht bauen.
+    """
     }
 
     message = error_messages.get(reason)
