@@ -1,6 +1,10 @@
-from david_web.planisphere import *
+from david_web.engine import *
 from david_web import gamestate
 import pytest
+
+davids_room = match_Room('davids_room')
+
+hallway = match_Room('hallway')
 
 
 @pytest.fixture()
@@ -8,29 +12,21 @@ def reset():
     pass
 
 
-def test_room():
-    gold = Room("GoldRoom",
-                """This room has gold in it you can grab. There's a
-                door to the north.""")
-    assert gold.name == "GoldRoom"
-    assert gold.paths == {}
-
-
 def test_david_map():
     go_hallway = Action(davids_room, 'geh in den flur')
-    assert go_hallway.determine_action() == hallway
+    assert go_hallway.determine_action() == 'hallway'
     go_outside = Action(hallway, 'geh raus')
-    assert go_outside.determine_action() == outside
+    assert go_outside.determine_action() == 'outside'
 
 
 def test_Action():
 
     test_action = Action(davids_room, 'geh in den flur')
-    assert test_action.determine_action() == hallway
+    assert test_action.determine_action() == 'hallway'
     test_action = Action(davids_room, 'geh in den flur')
     test_action.scan_action()
     assert test_action.verbs == ['go']
-    assert test_action.directions == ['flur']
+    assert test_action.directions == ['hallway']
     assert test_action.verb_count == 1
     assert test_action.object_count == 0
     test_action = Action(davids_room, 'nimm und iss die pflanze')
@@ -71,6 +67,5 @@ def test_check_gamestate(reset):
 
 def test_object_names():
 
-    test_scene = Room("Name", "Description")
-    test_scene.add_object_names(['object_1', 'object_2'])
+    test_scene = Room("Name", "Description", ['test_path'], ['object_1', 'object_2'])
     assert test_scene.object_names == ['object_1', 'object_2']

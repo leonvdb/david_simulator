@@ -1,7 +1,8 @@
 from flask import Flask, session, redirect, url_for, escape, request
 from flask import render_template
-from david_web import planisphere
+from david_web import engine
 from david_web import gamestate
+from david_web import planisphere
 
 app = Flask(__name__)
 
@@ -27,7 +28,7 @@ def game():
             return render_template("you_died.html")
 
         if room_name:
-            room = planisphere.load_room(room_name)
+            room = engine.match_Room(room_name)
             return render_template("show_room.html", room=room, action_name=action_name)
         else:
             # why is there here? do you need it?
@@ -37,15 +38,18 @@ def game():
         action = request.form.get('action')
 
         if room_name and action:
-            room = planisphere.load_room(room_name)
-            action_instance = planisphere.Action(room, action)
+            room = engine.match_Room(room_name)
+
+            action_instance = engine.Action(room, action)
             final_action = action_instance.determine_action()
 
             if action_instance.action_type != 'go':
-                session['room_name'] = planisphere.name_room(room)
+
+                session['room_name'] = engine.name_room(room)
                 session['final_action'] = final_action
             else:
-                session['room_name'] = planisphere.name_room(final_action)
+
+                session['room_name'] = final_action
                 session['final_action'] = False
 
         return redirect(url_for("game"))

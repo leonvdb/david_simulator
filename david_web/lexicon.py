@@ -1,4 +1,4 @@
-from david_web import planisphere
+from david_web import engine
 from david_web import lexicon_resources
 
 
@@ -8,7 +8,7 @@ class LexcionError(Exception):
 
 def collect_names(category_name):
     all_collected_names = []
-    instance_names = planisphere.Room.instances
+    instance_names = engine.Room.instances
     if category_name == 'paths':
 
         for instance in instance_names:
@@ -72,8 +72,8 @@ def replace_synonyms(sentence):
 def scan(sentence):
     # clean_words are used for scanning, original_words will be matched to type
     clean_words = replace_synonyms(sentence)
-    direction_names = planisphere.directions_from_rooms
-    object_names = list(planisphere.objects_from_rooms) + lexicon_resources.object_names
+    direction_names = engine.directions_from_rooms
+    object_names = engine.objects_from_rooms
     verb_names = lexicon_resources.verb_names
     stop_names = lexicon_resources.stop_names
     matches_clean = []
