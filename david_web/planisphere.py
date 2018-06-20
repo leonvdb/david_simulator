@@ -30,5 +30,9 @@ rooms = {'davids_room': {'name': 'Davids Room',
                          'description': 'Description of Bathroom',
                          'paths': ['hallway'],
                          'objects': ['monster', 'b12', 'toilette']},
+         'fridge':      {'name': 'Fridge',
+                         'description': 'Description of the Fridge',
+                         'paths': ['kitchen'],
+                         'objects': ['pfeffi', 'kerze']}
 
          }

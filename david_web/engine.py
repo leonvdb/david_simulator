@@ -3,6 +3,7 @@ from david_web import error_messages
 from david_web import action_resources
 from david_web import gamestate
 from david_web import planisphere
+from david_web import special_actions
 from textwrap import dedent
 
 
@@ -81,6 +82,7 @@ class Action(object):
         self.object_count = 0
         self.action_type = ''
         self.with_action = False
+        self.special_message = None
 
     def scan_action(self):
         scanned_action = lexicon.scan(self.action)
@@ -119,6 +121,8 @@ class Action(object):
             return self.take()
         elif 'gamestate' in self.verbs:
             return self.gamestate()
+        elif 'build' in self.verbs:
+            return self.build()
         else:
             pass
 
@@ -163,7 +167,9 @@ class Action(object):
 
     def attack(self):
         self.action_type = 'attack'
-        if self.object_count > 1:
+        if self.object_count > 1 and self.with_action == False:
+            return self.error('too many opponents')
+        elif self.object_count > 2 and self.with_action == True:
             return self.error('too many opponents')
         elif self.object_count < 1:
             return self.error('no opponents')
@@ -171,7 +177,17 @@ class Action(object):
             return self.error('opponent not in room')
         elif self.objects[0] not in list(gamestate.opponents.keys()):
             return self.error('object not attackable')
+
         else:
+            if self.object_count == 2 and self.with_action == True:
+                if self.objects[1] not in list(action_resources.weapons.keys()):
+                    return self.error('not a valid weapon')
+            if self.objects[0] in list(special_actions.attack.keys()):
+                action_data = special_actions.attack.get(self.objects[0])
+                if action_data.get('message') != 'none':
+                    self.special_message = action_data.get('message')
+                if action_data.get('special_action') == True:
+                    special_actions.special_attack(self)
 
             opp_data = gamestate.opponents.get(self.objects[0])
             opp_lp = opp_data.get('lp')
@@ -181,6 +197,9 @@ class Action(object):
             else:
                 opp_ap = opp_data.get('ap')
                 david_ap = gamestate.character_stats.get('Attack_Points')
+                if self.with_action == True:
+                    weapon_attack = action_resources.weapons.get(self.objects[1])
+                    david_ap = david_ap + weapon_attack
                 david_lp = gamestate.character_stats.get('Health')
                 gamestate.opponents[self.objects[0]]['lp'] = opp_lp - david_ap
                 gamestate.character_stats['Health'] = david_lp - opp_ap
@@ -189,7 +208,10 @@ class Action(object):
                 opp_lp = opp_data.get('lp')
                 david_lp = gamestate.character_stats.get('Health')
                 message = f"""
-                David im Kampf gegen {self.objects[0]}!
+                David im Kampf gegen {self.objects[0]}! """
+                if self.special_message != None:
+                    message = message + self.special_message
+                message = message + f"""
                 David fügt {self.objects[0]} {david_ap} Schaden zu.
                 {self.objects[0]} hat noch {opp_lp} Lebenspunkte.
                 {self.objects[0]} fügt David {opp_ap} Schaden zu.
@@ -256,3 +278,43 @@ class Action(object):
                 return self.error('direction unavailable')
         else:
             return self.error('no direction')
+
+    def build(self):
+        self.action_type = 'build'
+        if self.object_count < 1:
+            return self.error('no build objects')
+        elif self.object_count > 1:
+            return self.error('too many build objects')
+        elif self.objects[0] not in list(action_resources.buildable_objects.keys()):
+            return self.error('object not buildable')
+        elif self.objects[0] in list(action_resources.buildable_objects.keys()):
+            ingredients = action_resources.buildable_objects.get(self.objects[0])
+            available = []
+            missing = []
+            for i in ingredients:
+
+                if i in gamestate.inventory or i in self.current_room.object_names:
+                    available.append(i)
+                else:
+                    missing.append(i)
+
+            if available == ingredients:
+                gamestate.inventory.append(self.objects[0])
+                for i in ingredients:
+
+                    if i in gamestate.inventory:
+                        inventory_position = gamestate.inventory.index(i)
+                        gamestate.inventory.pop(inventory_position)
+                    elif i in self.current_room.object_names:
+                        position_in_room = self.current_room.object_names.index(i)
+                        self.current_room.object_names.pop(position_in_room)
+
+                return dedent(f"""
+                Du hast erfolgreich das Objekt {self.objects[0]} gebaut!
+                Es wurde deinem Inventar hinzugefügt!
+                """)
+            else:
+                return dedent(f"""
+                Du kannst das Objekt {self.objects[0]} noch nicht bauen.
+                Dir fehlen noch folgende Objekte: {missing}.
+                """)

@@ -31,13 +31,19 @@ synonyms_dict = {
     'inventory': 'gamestate',
     'status': 'gamestate',
     'character': 'gamestate',
-    'char': 'gamestate'
+    'char': 'gamestate',
+    'bau': 'build',
+    'bauen': 'build',
+    'basteln': 'build',
+    'bastel': 'build'
 
 }
 
 two_word_names = {'davids': {'zimmer': 'davids_room'},
                   'leons': {'zimmer': 'leons_room'}}
 
-verb_names = ['take', 'go', 'consume', 'attack', 'gamestate']
+verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build']
+
+object_names = ['build_test', 'ingredient1', 'ingredient2']
 
 stop_names = ['the', 'in', 'of', 'to', 'with']

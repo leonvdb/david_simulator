@@ -73,7 +73,7 @@ def scan(sentence):
     # clean_words are used for scanning, original_words will be matched to type
     clean_words = replace_synonyms(sentence)
     direction_names = engine.directions_from_rooms
-    object_names = engine.objects_from_rooms
+    object_names = list(engine.objects_from_rooms) + lexicon_resources.object_names
     verb_names = lexicon_resources.verb_names
     stop_names = lexicon_resources.stop_names
     matches_clean = []
