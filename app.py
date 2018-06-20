@@ -3,6 +3,7 @@ from flask import render_template
 from david_web import engine
 from david_web import gamestate
 from david_web import planisphere
+from config import secrets
 
 app = Flask(__name__)
 
@@ -55,7 +56,7 @@ def game():
         return redirect(url_for("game"))
 
 
-app.secret_key = 'uYstR*b27j6w7EztZl@1MH#Xtr0LkD'
+app.secret_key = secrets.secret_app_key
 
 if __name__ == "__main__":
     app.run(debug=True)
