@@ -75,8 +75,11 @@ class Action(object):
         self.current_room = current_room
         self.action = action
         self.verbs = []
+        self.verbs_original = lexicon.get_original_input(action, 'verbs')
         self.directions = []
+        self.directions_original = lexicon.get_original_input(action, 'directions')
         self.objects = []
+        self.objects_original = lexicon.get_original_input(action, 'objects')
         self.verb_count = 0
         self.direction_count = 0
         self.object_count = 0
@@ -130,16 +133,25 @@ class Action(object):
         self.action_type = 'error'
 
         message = dedent(error_messages.return_error_message(reason))
-        message = message.format(verbs=self.verbs, verb_count=self.verb_count,
-                                 objects=self.objects, object_count=self.object_count,
-                                 directions=self.directions, direction_count=self.direction_count)
-
+        message = message.format(verbs=self.verbs_original, verb_count=self.verb_count,
+                                 objects=self.objects_original, object_count=self.object_count,
+                                 directions=self.directions_original, direction_count=self.direction_count)
+        message = message.replace('[', '')
+        message = message.replace(']', '')
+        message = message.replace("'", "")
         return message
 
     def gamestate(self):
         lp = gamestate.character_stats.get('Health')
         ap = gamestate.character_stats.get('Attack_Points')
-        invetory_str = ','.join(gamestate.inventory)
+        inventory_no_tuples = []
+        for i in gamestate.inventory:
+            if isinstance(i[1], int):
+                inventory_no_tuples.append(f'{i[1]} {i[0]}')
+            else:
+                inventory_no_tuples.append(i)
+
+        invetory_str = ','.join(inventory_no_tuples)
 
         return dedent(f"""
         Lebenspunkte: {lp}
@@ -160,7 +172,19 @@ class Action(object):
         else:
             position_in_room = self.current_room.object_names.index(self.objects[0])
             self.current_room.object_names.pop(position_in_room)
-            gamestate.inventory.append(self.objects[0])
+            if self.objects[0] not in gamestate.inventory:
+                gamestate.inventory.append(self.objects[0])
+            else:
+                tuple_in_inventory = False
+                for i in gamestate.inventory:
+                    if i[0] == self.objects[0]:
+                        i[1] += 1
+                        tuple_in_inventory = True
+                if tuple_in_inventory == False:
+                    position_in_inventory = gamestate.inventory.index(self.objects[0])
+                    gamestate.inventory.pop(position_in_inventory)
+                    gamestate.inventory.append((self.objects[0], 2))
+
             return dedent(f"""
             Das Objekt \"{self.objects[0]}\" wurde deinem Inventar hinzugefügt!
             """)
@@ -225,13 +249,18 @@ class Action(object):
 
     def consume(self):
         self.action_type = 'consume'
+        object_stacked = False
         if self.object_count > 1:
             return self.error('too many food objects')
         elif self.object_count < 1:
             return self.error('no food objects')
         elif self.objects[0] not in self.current_room.object_names and self.objects[0] not in gamestate.inventory:
-            return self.error('food object not available')
-        elif self.objects[0] not in list(action_resources.consumable_objects.keys()):
+            for i in gamestate.inventory:
+                if i[0] == self.objects[0]:
+                    object_stacked = True
+            if object_stacked == False:
+                return self.error('food object not available')
+        if self.objects[0] not in list(action_resources.consumable_objects.keys()):
             return self.error('food object not consumable')
         else:
             if self.objects[0] in gamestate.inventory:
@@ -240,6 +269,17 @@ class Action(object):
             elif self.objects[0] in self.current_room.object_names:
                 position_in_room = self.current_room.object_names.index(self.objects[0])
                 self.current_room.object_names.pop(position_in_room)
+
+            elif object_stacked == True:
+                for i in gamestate.inventory:
+                    if isinstance(i[1], int):
+                        position_in_inventory = gamestate.inventory.index(i)
+                        if i[1] > 2:
+                            i[1] -= 1
+                        else:
+                            gamestate.inventory.pop(position_in_inventory)
+                            gamestate.inventory.append(i[0])
+
             david_ap = gamestate.character_stats.get('Attack_Points')
             david_lp = gamestate.character_stats.get('Health')
             consumable_data = action_resources.consumable_objects.get(self.objects[0])
@@ -273,7 +313,13 @@ class Action(object):
             self.action_type = 'go'
 
             if self.directions[0] in self.current_room.paths:
+                gamestate.room_log.append(self.directions[0])
                 return self.directions[0]
+            elif self.directions[0] == 'back' and len(gamestate.room_log) > 1:
+                return gamestate.room_log[len(gamestate.room_log) - 2]
+            elif self.directions[0] == 'back' and len(gamestate.room_log) <= 1:
+                return self.error('cannot go back')
+
             else:
                 return self.error('direction unavailable')
         else:

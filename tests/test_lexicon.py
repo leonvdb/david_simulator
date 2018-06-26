@@ -27,3 +27,9 @@ def test_lexicon_results():
     result = scan('iss die pflanze auf!')
     assert result == [('verb', 'consume'), ('error', 'die'),
                       ('object', 'pflanze'), ('error', 'auf')]
+
+    result = get_original_input('iss den eingangsbereich auf', 'verbs')
+    assert result == ['iss']
+
+    result = get_original_input('iss den Eingangsbereich auf', 'directions')
+    assert result == ['Eingangsbereich']

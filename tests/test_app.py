@@ -43,6 +43,11 @@ def test_game(client):
     assert rv.status_code, 200
     assert b"Davids Room" in rv.data
 
+    data = {'action': 'geh zurück'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'nirgendwo' in rv.data
+
     data = {'action': 'geh in den flur'}
     rv = client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -151,6 +156,42 @@ def test_back_home(new_client):
     assert gamestate.character_stats.get('Health') == 110
     assert gamestate.character_stats.get('Attack_Points') == 30
     assert 'b12' not in bathroom.object_names
+
+    data = {'action': 'geh in den flur'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Hallway' in rv.data
+
+    data = {'action': 'geh in die Küche'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Kitchen' in rv.data
+
+    data = {'action': 'nimm den pfeffi'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert 'pfeffi' in gamestate.inventory
+
+    data = {'action': 'öffne den Kühlschrank'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Fridge' in rv.data
+
+    data = {'action': 'nimm den pfeffi'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert ('pfeffi', 2) in gamestate.inventory
+
+    data = {'action': 'trink den pfeffi'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'konsumiert' in rv.data
+    assert 'pfeffi' in gamestate.inventory
+
+    data = {'action': 'geh zurück'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Kitchen' in rv.data
 
 
 # def test_take(new_client2):

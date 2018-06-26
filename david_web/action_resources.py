@@ -1,9 +1,10 @@
-takeable = ['pflanze', 'scalpell', 'b12', 'salat']
+takeable = ['pflanze', 'scalpell', 'b12', 'salat', 'pfeffi']
 
 consumable_objects = {
     'pflanze': {'lp': 10, 'ap': 0, 'special': 'vegan'},
     'salat': {'lp': 10, 'ap': 0, 'special': 'vegan'},
-    'b12': {'lp': 20, 'ap': 10, 'special': None}
+    'b12': {'lp': 20, 'ap': 10, 'special': None},
+    'pfeffi': {'lp': -5, 'ap': 5, 'special': 'drunk'}
 }
 
 buildable_objects = {

@@ -25,13 +25,15 @@ def test_Action():
     assert test_action.determine_action() == 'hallway'
     test_action = Action(davids_room, 'geh in den flur')
     test_action.scan_action()
+    assert test_action.verbs_original == ['geh']
     assert test_action.verbs == ['go']
+    assert test_action.directions_original == ['flur']
     assert test_action.directions == ['hallway']
     assert test_action.verb_count == 1
     assert test_action.object_count == 0
     test_action = Action(davids_room, 'nimm und iss die pflanze')
     result = test_action.determine_action()
-    assert result == "\nDu hast zu viele Verben angegeben: ['take', 'consume'].\nBitte schreib nur ein Verb statt 2!\n"
+    assert result == "\nDu hast zu viele Verben angegeben: nimm, iss.\nBitte schreib nur ein Verb statt 2!\n"
     test_action = Action(davids_room, 'die pflanze!!!')
     result = test_action.determine_action()
     assert result == '\nDu hast kein bekanntes Verb in deinen Befehl geschrieben!\nBitte gib ein Verb an!\n'
@@ -48,8 +50,8 @@ def test_take():
     assert test_action.determine_action(
     ) == '\nDu hast keinen bekannten Gegenstand angegeben.\nBitte gib ein Objekt an das du aufnehmen möchtest.\n'
     test_action = Action(hallway, 'nimm die pflanze')
-    assert test_action.determine_action(
-    ) == "\nDas angegebene objekt \"pflanze\" befindet sich nicht in diesem Bereich.\nLeider kannst du es also nicht aufnehmen...\n"
+    result = test_action.determine_action()
+    assert result == '\nDas angegebene objekt "pflanze" befindet sich nicht in diesem Bereich.\nLeider kannst du es also nicht aufnehmen...\n'
     test_action = Action(davids_room, 'nimm die pflanze')
     result = test_action.determine_action()
     assert 'pflanze' in gamestate.inventory
@@ -57,7 +59,10 @@ def test_take():
     assert result == "\nDas Objekt \"pflanze\" wurde deinem Inventar hinzugefügt!\n"
     test_action = Action(davids_room, 'nimm das Bett')
     result = test_action.determine_action()
-    assert result == '\nDas angegebene objekt "bett" kannst du leider nicht aufnehmen.\n'
+    assert result == '\nDas angegebene objekt "Bett" kannst du leider nicht aufnehmen.\n'
+    test_action = Action(davids_room, 'greif das Bett mit der Pflanze an!')
+    result = test_action.determine_action()
+    assert result == '\nDas Objekt "Pflanze" kannst du nicht als Waffe benutzen.\n'
 
 
 def test_check_gamestate(reset):

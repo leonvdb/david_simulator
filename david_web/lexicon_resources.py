@@ -10,6 +10,8 @@ synonyms_dict = {
     'badezimmer': 'bathroom',
     'küche': 'kitchen',
     'wohnzimmer': 'living_room',
+    'kühlschrank': 'fridge',
+    'zurück': 'back',
     ### VERB SYNONYMS GERMAN ###
     'nimm': 'take',
     'nehmen': 'take',
@@ -19,6 +21,9 @@ synonyms_dict = {
     'bewegen': 'go',
     'geh': 'go',
     'gehen': 'go',
+    'öffne': 'go',
+    'öffnen': 'go',
+    'open': 'go',
     'iss': 'consume',
     'ess': 'consume',
     'essen': 'consume',
@@ -47,3 +52,5 @@ verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build']
 object_names = ['build_test', 'ingredient1', 'ingredient2']
 
 stop_names = ['the', 'in', 'of', 'to', 'with']
+
+direction_names = ['back']

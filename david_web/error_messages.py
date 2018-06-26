@@ -23,6 +23,9 @@ def return_error_message(reason):
         'direction unavailable': """
     Du hast kannst das angegebene Ziel von hier nicht erreichen.
     """,
+        'cannot go back': """
+    Du kannst nicht zurückgehen, weil du nirgendwo hergekommen bist.
+    """,
         'no take objects': """
     Du hast keinen bekannten Gegenstand angegeben.
     Bitte gib ein Objekt an das du aufnehmen möchtest.
@@ -32,11 +35,11 @@ def return_error_message(reason):
     Du kannst nur ein Objekt gleichzeitig aufnehmen und nicht {object_count}.
     """,
         'object not in room': """
-    Das angegebene objekt \"{objects[0]}\" befindet sich nicht in diesem Bereich.
+    Das angegebene objekt \"{objects}\" befindet sich nicht in diesem Bereich.
     Leider kannst du es also nicht aufnehmen...
     """,
         'object not takeable': """
-    Das angegebene objekt \"{objects[0]}\" kannst du leider nicht aufnehmen.
+    Das angegebene objekt \"{objects}\" kannst du leider nicht aufnehmen.
     """,
         'too many opponents': """
     Du hast zu viele Objekte angegeben die du angreifen möchtest: {objects}.
@@ -50,10 +53,10 @@ def return_error_message(reason):
     Das Objekt, dass du angreifen möchtest befindet sich nicht in diesem Raum.
     """,
         'object not attackable': """
-    Das Objekt \"{objects[0]}\" kannst du nicht angrefen.
+    Das Objekt \"{objects}\" kannst du nicht angrefen.
     """,
         'opponent already dead': """
-    Der Gegner \"{objects[0]}\" ist bereits besiegt. Du kannst ihn nicht nochmal angrefen.
+    Der Gegner \"{objects}\" ist bereits besiegt. Du kannst ihn nicht nochmal angrefen.
     """,
         'too many food objects': """
     Du hast zu viele Objekte angegeben die du konsumieren möchtest: {objects}.
@@ -67,7 +70,7 @@ def return_error_message(reason):
     Das Objekt, dass du konsumieren möchtest befindet sich weder in diesem Raum, noch in deinem Inventar.
         """,
         'food object not consumable': """
-    Das Objekt \"{objects[0]}\" kannst du nicht konsumieren.
+    Das Objekt \"{objects}\" kannst du nicht konsumieren.
         """,
         'not a valid weapon': """
     Das Objekt \"{objects[1]}\" kannst du nicht als Waffe benutzen.
@@ -80,7 +83,7 @@ def return_error_message(reason):
     Du kannst nur ein Objekt gleichzeitig bauen und nicht {object_count}.
         """,
         'object not buildable': """
-    Das Objekt \"{objects[0]}\" kannst du nicht bauen.
+    Das Objekt \"{objects}\" kannst du nicht bauen.
     """
     }
 

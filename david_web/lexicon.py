@@ -40,7 +40,7 @@ def clean(sentence):
         no_dots = i.replace(".", "")
         no_question = no_dots.replace("?", "")
         no_exclamation = no_question.replace("!", "")
-        result.append(no_exclamation.lower())
+        result.append(no_exclamation)
 
     return result
 
@@ -50,6 +50,7 @@ def replace_synonyms(sentence):
     clean_words = clean(sentence)
     position = 0
     for i in clean_words:
+        i = i.lower()
         if position < len(clean_words)-1:
             next_word = clean_words[position+1]
         else:
@@ -72,7 +73,7 @@ def replace_synonyms(sentence):
 def scan(sentence):
     # clean_words are used for scanning, original_words will be matched to type
     clean_words = replace_synonyms(sentence)
-    direction_names = engine.directions_from_rooms
+    direction_names = list(engine.directions_from_rooms) + lexicon_resources.direction_names
     object_names = list(engine.objects_from_rooms) + lexicon_resources.object_names
     verb_names = lexicon_resources.verb_names
     stop_names = lexicon_resources.stop_names
@@ -99,3 +100,42 @@ def scan(sentence):
                 matches_clean.append(('error', i))
 
     return matches_clean
+
+
+def get_original_input(sentence, mode):
+    clean_original_words = clean(sentence)
+    original_words_matched = []
+    filtered_by_mode = []
+    for i in clean_original_words:
+        i_lower = i.lower()
+        scanned = scan(i)[0]
+        type = scanned[0]
+        if i_lower in list(lexicon_resources.synonyms_dict.keys()):
+
+            original_words_matched.append((type, i))
+        elif i_lower == scanned[1]:
+            original_words_matched.append((type, i))
+
+    if mode == 'objects':
+        for i in original_words_matched:
+            if i[0] == 'object':
+                filtered_by_mode.append(i[1])
+    elif mode == 'directions':
+        for i in original_words_matched:
+            if i[0] == 'direction':
+                filtered_by_mode.append(i[1])
+    elif mode == 'verbs':
+        for i in original_words_matched:
+            if i[0] == 'verb':
+                filtered_by_mode.append(i[1])
+    else:
+        raise LexcionError(f"""
+        Expected a different category. This category has been given:
+        {category_name}
+        """)
+
+    return filtered_by_mode
+    # for clean clean_words
+    # if in synonyms append to x_list with key
+    #
+    # for objects, directions if in key of x_list append to list object_original, etc.
