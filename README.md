@@ -5,15 +5,15 @@ This is an authentic simulation of Davids life in the year 2018.
 
 Feedback on the code is very much appreciated!
 
-To run: 
+To run:
 
-- Install Flask and Pytest packages. 
+- Make sure you have the packages in requirements.txt. 
 - Create config/secrets.py and assign a secret key to secret_app_key
 
   config/secrets.py:
-  
+
   secret_app_key = 'YourSecretKey'
-  
-  
+
+
 - Run "Python3.6 app.py" in your Terminal
 - Go to http://localhost:5000/
