@@ -1,10 +1,11 @@
 from david_web import lexicon
-from david_web import error_messages
 from david_web import action_resources
 from david_web import gamestate
 from david_web import planisphere
 from david_web import special_actions
+from david_web import configuration
 from textwrap import dedent
+import sqlite3
 
 
 class Room(object):
@@ -131,8 +132,14 @@ class Action(object):
 
     def error(self, reason):
         self.action_type = 'error'
-
-        message = dedent(error_messages.return_error_message(reason))
+        conn = sqlite3.connect(configuration.error_messages_path)
+        c = conn.cursor()
+        c.execute("SELECT message FROM error_messages WHERE key =:key;", {'key': reason})
+        tuple_from_db = c.fetchone()
+        message = tuple_from_db[0]
+        conn.close()
+        message = dedent(message)
+        # message = dedent(error_messages.return_error_message(reason))
         message = message.format(verbs=self.verbs_original, verb_count=self.verb_count,
                                  objects=self.objects_original, object_count=self.object_count,
                                  directions=self.directions_original, direction_count=self.direction_count)
