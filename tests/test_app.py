@@ -78,7 +78,7 @@ def test_back_home(new_client):
     assert b'erfolgreich' in rv.data
     assert 'build_test' in gamestate.inventory
     assert 'ingredient1' not in gamestate.inventory
-    davids_room = engine.match_Room('davids_room')
+    davids_room = engine.match_room('davids_room')
     assert 'ingredient2' not in davids_room.object_names
 
     data = {'action': 'nimm den salat'}
@@ -147,7 +147,7 @@ def test_back_home(new_client):
     assert gamestate.character_stats.get('Health') == 90
     assert 'vegan' in gamestate.states
     assert 'salat' not in gamestate.inventory
-    bathroom = engine.match_Room('bathroom')
+    bathroom = engine.match_room('bathroom')
     assert 'b12' in bathroom.object_names
 
     data = {'action': 'iss das B12'}

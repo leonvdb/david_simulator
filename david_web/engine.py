@@ -9,7 +9,6 @@ import sqlite3
 
 
 class Room(object):
-
     instances = []
 
     def __init__(self, name, description, paths, object_names):
@@ -24,7 +23,6 @@ class Room(object):
 
 
 class ProcessDirector:
-
     instance_id = {}
 
     def __init__(self):
@@ -40,7 +38,6 @@ director = ProcessDirector()
 
 
 def initalise_rooms():
-
     for i in list(planisphere.rooms.keys()):
         i_data = planisphere.rooms.get(i)
         name = i_data.get('name')
@@ -58,14 +55,14 @@ directions_from_rooms = lexicon.collect_names('paths')
 
 
 def name_room(room):
-
     for key, value in ProcessDirector.instance_id.items():
 
         if value == room:
-            return key
+            return key 
+                
 
 
-def match_Room(name):
+def match_room(name):
     instance = ProcessDirector.instance_id.get(name)
     return instance
 
@@ -187,7 +184,7 @@ class Action(object):
                     if i[0] == self.objects[0]:
                         i[1] += 1
                         tuple_in_inventory = True
-                if tuple_in_inventory == False:
+                if not tuple_in_inventory:
                     position_in_inventory = gamestate.inventory.index(self.objects[0])
                     gamestate.inventory.pop(position_in_inventory)
                     gamestate.inventory.append((self.objects[0], 2))
@@ -200,7 +197,7 @@ class Action(object):
         self.action_type = 'attack'
         if self.object_count > 1 and self.with_action == False:
             return self.error('too many opponents')
-        elif self.object_count > 2 and self.with_action == True:
+        elif self.object_count > 2 and self.with_action:
             return self.error('too many opponents')
         elif self.object_count < 1:
             return self.error('no opponents')
@@ -228,7 +225,7 @@ class Action(object):
             else:
                 opp_ap = opp_data.get('ap')
                 david_ap = gamestate.character_stats.get('Attack_Points')
-                if self.with_action == True:
+                if self.with_action:
                     weapon_attack = action_resources.weapons.get(self.objects[1])
                     david_ap = david_ap + weapon_attack
                 david_lp = gamestate.character_stats.get('Health')

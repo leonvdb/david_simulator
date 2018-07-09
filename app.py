@@ -29,7 +29,7 @@ def game():
             return render_template("you_died.html")
 
         if room_name:
-            room = engine.match_Room(room_name)
+            room = engine.match_room(room_name)
             return render_template("show_room.html", room=room, action_name=action_name)
         else:
             # why is there here? do you need it?
@@ -39,7 +39,7 @@ def game():
         action = request.form.get('action')
 
         if room_name and action:
-            room = engine.match_Room(room_name)
+            room = engine.match_room(room_name)
 
             action_instance = engine.Action(room, action)
             final_action = action_instance.determine_action()

@@ -1,10 +1,10 @@
-from david_web.engine import *
+from david_web.engine import match_room, Action, Room
 from david_web import gamestate
 import pytest
 
-davids_room = match_Room('davids_room')
+davids_room = match_room('davids_room')
 
-hallway = match_Room('hallway')
+hallway = match_room('hallway')
 
 
 @pytest.fixture()
@@ -65,9 +65,9 @@ def test_take():
     assert result == '\nDas Objekt "Pflanze" kannst du nicht als Waffe benutzen.\n'
 
 
-def test_check_gamestate(reset):
-    test_action = Action(davids_room, 'gamestate')
-    result = test_action.determine_action()
+# def test_check_gamestate(reset):
+#     test_action = Action(davids_room, 'gamestate')
+#     result = test_action.determine_action()
 
 
 def test_object_names():
