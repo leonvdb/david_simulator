@@ -1,11 +1,16 @@
-from flask import Flask, session, redirect, url_for, escape, request
-from flask import render_template
+from flask import Flask, session, redirect, url_for, escape, request, render_template
+from flask_sqlalchemy import SQLAlchemy
 from david_web import engine
 from david_web import gamestate
 from david_web import planisphere
-from config import secrets
+from david_web.planisphere import db
+from config import secrets # pylint: disable-msg=E0611
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+db.init_app(app)
+db.app = app
 
 
 @app.route("/")
