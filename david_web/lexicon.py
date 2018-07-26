@@ -1,10 +1,38 @@
 from david_web import engine
 from david_web import lexicon_resources
+from david_web import planisphere
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from config import secrets # pylint: disable-msg=E0611
+from david_web.planisphere import db
 
 
 class LexcionError(Exception):
     pass
 
+def create_resources(category_name):
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+    db.init_app(app)
+    db.app = app
+
+    name_list = []
+    resource_table = planisphere.Item.query.all()
+    if category_name == 'item':
+        resource_table = planisphere.Item.query.all()
+    elif category_name == 'room':
+        resource_table = planisphere.Room.query.all()
+    elif category_name == 'character':
+        resource_table = planisphere.Character.query.all()
+    else:
+        raise LexcionError(f"""
+        Unknown category '{category_name}'""")
+    
+    for i in resource_table: 
+        name_list.append(i.name)
+
+    return name_list
 
 def collect_names(category_name):
     all_collected_names = []
@@ -22,6 +50,7 @@ def collect_names(category_name):
         for instance in instance_names:
 
             all_collected_names.extend(instance.object_names)
+        print("Old colection",set(all_collected_names))
 
         return set(all_collected_names)
 
@@ -73,6 +102,7 @@ def replace_synonyms(sentence):
 def scan(sentence):
     # clean_words are used for scanning, original_words will be matched to type
     clean_words = replace_synonyms(sentence)
+    #TODO: replace list(engine.directions/objects_from_rooms) with data from database. Then collect_names() and Room.Instances can be removed 
     direction_names = list(engine.directions_from_rooms) + lexicon_resources.direction_names
     object_names = list(engine.objects_from_rooms) + lexicon_resources.object_names
     verb_names = lexicon_resources.verb_names

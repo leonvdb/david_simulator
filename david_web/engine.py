@@ -2,11 +2,28 @@ from david_web import lexicon
 from david_web import action_resources
 from david_web import gamestate
 from david_web import planisphere
+from david_web.planisphere import db
 from david_web import special_actions
 from david_web import configuration
+from config import secrets # pylint: disable-msg=E0611
 from textwrap import dedent
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 
+
+def print_rooms():
+    #This is just an example of how to access data from the database
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+    db.init_app(app)
+    db.app = app
+
+    room_from_db = planisphere.Room.query.all()
+
+    for i in room_from_db:
+        print(i.name)
 
 class Room(object):
     instances = []

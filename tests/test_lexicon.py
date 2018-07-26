@@ -12,6 +12,10 @@ def test_importing_names():
     objects_collection = collect_names('objects')
     assert 'bett' in objects_collection
 
+def test_new_importing_names():
+    all_items = create_resources('item')
+    print(">>>> ALl items: ", all_items)
+    assert 'chair' in all_items
 
 def test_lexicon_results():
 

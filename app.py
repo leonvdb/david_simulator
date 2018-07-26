@@ -37,7 +37,7 @@ def game():
             room = engine.match_room(room_name)
             return render_template("show_room.html", room=room, action_name=action_name)
         else:
-            # why is there here? do you need it?
+            #TODO: Add Error
             return render_template("you_died.html")
 
     else:

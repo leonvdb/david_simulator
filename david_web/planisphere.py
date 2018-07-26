@@ -17,8 +17,10 @@ recipes = db.Table('recipes',
 class Room(db.Model):
     instances = []
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    display_name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String)
+    image = db.Column(db.String)
     items = db.relationship('Item', backref='location')
     characters = db.relationship('Character', backref='location')
 
@@ -30,14 +32,17 @@ class Room(db.Model):
     lazy='dynamic'
     )
 
-    def __init__(self, name, description):
+    def __init__(self, name, description,  display_name, image=None):
         self.name = name
         self.description = description
+        self.image = image
+        self.display_name = display_name
         Room.instances.append(self)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     name = db.Column(db.String(50), nullable=False)
+    display_name = db.Column(db.String(50), nullable=False)
     takeable = db.Column(db.Boolean, nullable=False, default=False)
     location_id = db.Column(db.Integer, db.ForeignKey('room.id'))
     consume_lp = db.Column(db.Integer)
@@ -57,6 +62,7 @@ class Item(db.Model):
 class Character(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
+    display_name = db.Column(db.String(50), nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
     attack_points = db.Column(db.Integer)
     life_points = db.Column(db.Integer)
