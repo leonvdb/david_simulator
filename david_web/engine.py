@@ -83,6 +83,20 @@ def match_room(name):
     instance = ProcessDirector.instance_id.get(name)
     return instance
 
+def get_inventory():
+   
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+    db.init_app(app)
+    db.app = app
+
+    inventory_list = []
+    for i in planisphere.Item.query.filter(planisphere.Item.amount_in_inventory > 0).all():
+        inventory_list.append(i.name)
+
+    return inventory_list
+
 
 class Action(object):
 
@@ -165,14 +179,14 @@ class Action(object):
     def gamestate(self):
         lp = gamestate.character_stats.get('Health')
         ap = gamestate.character_stats.get('Attack_Points')
-        inventory_no_tuples = []
-        for i in gamestate.inventory:
-            if isinstance(i[1], int):
-                inventory_no_tuples.append(f'{i[1]} {i[0]}')
-            else:
-                inventory_no_tuples.append(i)
+        inventory_list = []
+        for i in planisphere.Item.query.filter(planisphere.Item.amount_in_inventory > 0).all():
+            if i.amount_in_inventory > 1:
+                inventory_list.append(f'{i.english_name} ({i.amount_in_inventory}x)')
+            else: 
+                inventory_list.append(i.english_name)
 
-        invetory_str = ','.join(inventory_no_tuples)
+        invetory_str = ','.join(inventory_list)
 
         return dedent(f"""
         Lebenspunkte: {lp}
@@ -181,33 +195,27 @@ class Action(object):
         """)
 
     def take(self):
+
         self.action_type = 'take'
         if self.object_count < 1:
             return self.error('no take objects')
         elif self.object_count > 1:
             return self.error('too many take objects')
-        elif self.objects[0] not in self.current_room.object_names:
+        else:
+            query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
+            print("Query Item", query_item)
+
+        if query_item.location.english_name != self.current_room.name: #TODO: Change from english_name to name when adapting Rooms to DB
             return self.error('object not in room')
-        elif self.objects[0] not in action_resources.takeable:
+        elif query_item.takeable != True :
             return self.error('object not takeable')
         else:
-            position_in_room = self.current_room.object_names.index(self.objects[0])
-            self.current_room.object_names.pop(position_in_room)
-            if self.objects[0] not in gamestate.inventory:
-                gamestate.inventory.append(self.objects[0])
-            else:
-                tuple_in_inventory = False
-                for i in gamestate.inventory:
-                    if i[0] == self.objects[0]:
-                        i[1] += 1
-                        tuple_in_inventory = True
-                if not tuple_in_inventory:
-                    position_in_inventory = gamestate.inventory.index(self.objects[0])
-                    gamestate.inventory.pop(position_in_inventory)
-                    gamestate.inventory.append((self.objects[0], 2))
+            query_item.location = None
+            query_item.amount_in_inventory += 1
+            db.session.commit() # pylint: disable-msg=E1101
 
             return dedent(f"""
-            Das Objekt \"{self.objects[0]}\" wurde deinem Inventar hinzugefügt!
+            Das Objekt \"{query_item.german_name}\" wurde deinem Inventar hinzugefügt!
             """)
 
     def attack(self):
@@ -218,9 +226,16 @@ class Action(object):
             return self.error('too many opponents')
         elif self.object_count < 1:
             return self.error('no opponents')
-        elif self.objects[0] not in self.current_room.object_names:
+        elif self.object_count == 1 and self.with_action:
+            return self.error('weapon or opponent missing')
+        #TODO: Add to manual - With action have to be phrase with the object first and the weapon
+        else:
+            query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
+            print(self.objects[0])
+            print("Query_item: ", query_item.name)
+        if query_item.location.english_name != self.current_room.name:
             return self.error('opponent not in room')
-        elif self.objects[0] not in list(gamestate.opponents.keys()):
+        elif self.objects[0] not in list(gamestate.opponents.keys()): #TODO: Adapt to DB
             return self.error('object not attackable')
 
         else:
@@ -231,7 +246,7 @@ class Action(object):
                 action_data = special_actions.attack.get(self.objects[0])
                 if action_data.get('message') != 'none':
                     self.special_message = action_data.get('message')
-                if action_data.get('special_action') == True:
+                if action_data.get('special_action'):
                     special_actions.special_attack(self)
 
             opp_data = gamestate.opponents.get(self.objects[0])
@@ -275,8 +290,8 @@ class Action(object):
             return self.error('too many food objects')
         elif self.object_count < 1:
             return self.error('no food objects')
-        elif self.objects[0] not in self.current_room.object_names and self.objects[0] not in gamestate.inventory:
-            for i in gamestate.inventory:
+        elif self.objects[0] not in self.current_room.object_names and self.objects[0] not in get_inventory():
+            for i in get_inventory():
                 if i[0] == self.objects[0]:
                     object_stacked = True
             if object_stacked == False:
@@ -284,22 +299,22 @@ class Action(object):
         if self.objects[0] not in list(action_resources.consumable_objects.keys()):
             return self.error('food object not consumable')
         else:
-            if self.objects[0] in gamestate.inventory:
-                position_in_inventory = gamestate.inventory.index(self.objects[0])
-                gamestate.inventory.pop(position_in_inventory)
+            if self.objects[0] in get_inventory():
+                position_in_inventory = get_inventory().index(self.objects[0])
+                get_inventory().pop(position_in_inventory)
             elif self.objects[0] in self.current_room.object_names:
                 position_in_room = self.current_room.object_names.index(self.objects[0])
                 self.current_room.object_names.pop(position_in_room)
 
             elif object_stacked == True:
-                for i in gamestate.inventory:
+                for i in get_inventory():
                     if isinstance(i[1], int):
-                        position_in_inventory = gamestate.inventory.index(i)
+                        position_in_inventory = get_inventory().index(i)
                         if i[1] > 2:
                             i[1] -= 1
                         else:
-                            gamestate.inventory.pop(position_in_inventory)
-                            gamestate.inventory.append(i[0])
+                            get_inventory().pop(position_in_inventory)
+                            get_inventory().append(i[0])
 
             david_ap = gamestate.character_stats.get('Attack_Points')
             david_lp = gamestate.character_stats.get('Health')
@@ -360,18 +375,18 @@ class Action(object):
             missing = []
             for i in ingredients:
 
-                if i in gamestate.inventory or i in self.current_room.object_names:
+                if i in get_inventory() or i in self.current_room.object_names:
                     available.append(i)
                 else:
                     missing.append(i)
 
             if available == ingredients:
-                gamestate.inventory.append(self.objects[0])
+                get_inventory().append(self.objects[0])
                 for i in ingredients:
 
-                    if i in gamestate.inventory:
-                        inventory_position = gamestate.inventory.index(i)
-                        gamestate.inventory.pop(inventory_position)
+                    if i in get_inventory():
+                        inventory_position = get_inventory().index(i)
+                        get_inventory().pop(inventory_position)
                     elif i in self.current_room.object_names:
                         position_in_room = self.current_room.object_names.index(i)
                         self.current_room.object_names.pop(position_in_room)

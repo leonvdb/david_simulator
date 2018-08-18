@@ -1,11 +1,22 @@
-from david_web.engine import match_room, Action, Room
+from david_web.engine import match_room, Action, Room, get_inventory
 from david_web import gamestate
+from david_web import planisphere
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from config import secrets # pylint: disable-msg=E0611
+from david_web.planisphere import db
+
 import pytest
 
 davids_room = match_room('davids_room')
-
+kitchen = match_room('kitchen')
 hallway = match_room('hallway')
 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+db.init_app(app)
+db.app = app
 
 @pytest.fixture()
 def reset():
@@ -54,9 +65,12 @@ def test_take():
     assert result == '\nDas angegebene objekt "pflanze" befindet sich nicht in diesem Bereich.\nLeider kannst du es also nicht aufnehmen...\n'
     test_action = Action(davids_room, 'nimm die pflanze')
     result = test_action.determine_action()
-    assert 'pflanze' in gamestate.inventory
-    assert 'pflanze' not in davids_room.object_names
-    assert result == "\nDas Objekt \"pflanze\" wurde deinem Inventar hinzugefügt!\n"
+    assert 'plant' in get_inventory()
+    assert planisphere.Item.query.filter_by(name='plant').first().location == None
+    assert result == "\nDas Objekt \"Pflanze\" wurde deinem Inventar hinzugefügt!\n"
+    test_action = Action(davids_room, 'gamestate')
+    result = test_action.determine_action()
+    assert 'Plant' in result
     test_action = Action(davids_room, 'nimm das Bett')
     result = test_action.determine_action()
     assert result == '\nDas angegebene objekt "Bett" kannst du leider nicht aufnehmen.\n'
@@ -65,9 +79,19 @@ def test_take():
     assert result == '\nDas Objekt "Pflanze" kannst du nicht als Waffe benutzen.\n'
 
 
-# def test_check_gamestate(reset):
-#     test_action = Action(davids_room, 'gamestate')
-#     result = test_action.determine_action()
+def test_check_gamestate():
+    test_action = Action(davids_room, 'gamestate')
+    result = test_action.determine_action()
+    print(">>>> enter current test")
+    test_action = Action(kitchen, 'nimm das Messer')
+    result = test_action.determine_action()
+    print("Exit")
+    assert 'knife' in get_inventory()
+    assert planisphere.Item.query.filter_by(name='knife').first().amount_in_inventory == 1
+    test_action = Action(davids_room, 'gamestate')
+    result = test_action.determine_action()
+    assert 'Knife' in result
+    print("Gamestate", result)
 
 
 def test_object_names():

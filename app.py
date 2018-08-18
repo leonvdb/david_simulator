@@ -1,9 +1,11 @@
 from flask import Flask, session, redirect, url_for, escape, request, render_template
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
+from david_web.planisphere import db
 from david_web import engine
 from david_web import gamestate
 from david_web import planisphere
-from david_web.planisphere import db
+import create_db
 from config import secrets # pylint: disable-msg=E0611
 
 app = Flask(__name__)
@@ -13,11 +15,18 @@ db.init_app(app)
 db.app = app
 
 
+
 @app.route("/")
 def index():
     # this is used to "setup" the session with starting values
+    # session['database'] = 'refresh' #TODO: Add 'save session' feature or 'new session' option on start screen
     session['room_name'] = planisphere.START
     session['final_action'] = False
+    try:
+        create_db.set_up()
+    except OperationalError:
+        create_db.set_up()
+
     return redirect(url_for("game"))
 
 

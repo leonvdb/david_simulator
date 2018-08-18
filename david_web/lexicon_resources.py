@@ -40,7 +40,10 @@ synonyms_dict = {
     'bau': 'build',
     'bauen': 'build',
     'basteln': 'build',
-    'bastel': 'build'
+    'bastel': 'build',
+    ### ITEM SYNONYMS ###
+    'pflanze': 'plant',
+    'messer': 'knife'
 
 }
 

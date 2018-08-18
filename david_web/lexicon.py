@@ -10,7 +10,7 @@ from david_web.planisphere import db
 class LexcionError(Exception):
     pass
 
-def create_resources(category_name):
+def create_resources(category_name, output_mode):
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
 
@@ -23,16 +23,21 @@ def create_resources(category_name):
         resource_table = planisphere.Item.query.all()
     elif category_name == 'room':
         resource_table = planisphere.Room.query.all()
-    elif category_name == 'character':
-        resource_table = planisphere.Character.query.all()
     else:
         raise LexcionError(f"""
         Unknown category '{category_name}'""")
     
-    for i in resource_table: 
-        name_list.append(i.name)
+    if output_mode == 'name':
+        for i in resource_table: 
+            name_list.append(i.name.lower())
+    if output_mode == 'english_name':
+        for i in resource_table: 
+            name_list.append(i.english_name.lower())
+    if output_mode == 'german_name':
+        for i in resource_table: 
+            name_list.append(i.german_name.lower())
 
-    return name_list
+    return set(name_list)
 
 def collect_names(category_name):
     all_collected_names = []
@@ -50,7 +55,6 @@ def collect_names(category_name):
         for instance in instance_names:
 
             all_collected_names.extend(instance.object_names)
-        print("Old colection",set(all_collected_names))
 
         return set(all_collected_names)
 
@@ -89,9 +93,25 @@ def replace_synonyms(sentence):
             replace = lexicon_resources.two_word_names[i][next_word]
             replaced.append(replace)
             clean_words.pop(position+1)
-
         else:
-            replace = lexicon_resources.synonyms_dict.get(i, i)
+            capitalized = i.capitalize()
+            if i in list(lexicon_resources.synonyms_dict.keys()):
+                replace = lexicon_resources.synonyms_dict.get(i)
+            elif i in create_resources('item', 'english_name'):
+                query = planisphere.Item.query.filter_by(english_name=capitalized).first()
+                replace = query.name
+            elif i in create_resources('room', 'english_name'):
+                query = planisphere.Room.query.filter_by(english_name=capitalized).first()
+                replace = query.name
+            elif i in create_resources('item', 'german_name'):
+                query = planisphere.Item.query.filter_by(german_name=capitalized).first()
+                replace = query.name
+            elif i in create_resources('room', 'german_name'):
+                query = planisphere.Room.query.filter_by(german_name=capitalized).first()
+                replace = query.name
+            else: 
+                replace = i
+            
             replaced.append(replace)
 
         position += 1
@@ -104,11 +124,10 @@ def scan(sentence):
     clean_words = replace_synonyms(sentence)
     #TODO: replace list(engine.directions/objects_from_rooms) with data from database. Then collect_names() and Room.Instances can be removed 
     direction_names = list(engine.directions_from_rooms) + lexicon_resources.direction_names
-    object_names = list(engine.objects_from_rooms) + lexicon_resources.object_names
+    object_names = list(create_resources('item', 'name')) + lexicon_resources.object_names
     verb_names = lexicon_resources.verb_names
     stop_names = lexicon_resources.stop_names
     matches_clean = []
-
     for i in clean_words:
 
         if i in direction_names:
@@ -139,12 +158,13 @@ def get_original_input(sentence, mode):
     for i in clean_original_words:
         i_lower = i.lower()
         scanned = scan(i)[0]
-        type = scanned[0]
-        if i_lower in list(lexicon_resources.synonyms_dict.keys()):
+        word_type = scanned[0]
+        # if i_lower in list(lexicon_resources.synonyms_dict.keys()):
 
-            original_words_matched.append((type, i))
-        elif i_lower == scanned[1]:
-            original_words_matched.append((type, i))
+        #     original_words_matched.append((word_type, i))
+        # elif i_lower == scanned[1]:
+        #     original_words_matched.append((word_type, i))
+        original_words_matched.append((word_type, i))
 
     if mode == 'objects':
         for i in original_words_matched:
@@ -161,7 +181,7 @@ def get_original_input(sentence, mode):
     else:
         raise LexcionError(f"""
         Expected a different category. This category has been given:
-        {category_name}
+        {mode}
         """)
 
     return filtered_by_mode

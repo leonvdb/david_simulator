@@ -1,5 +1,5 @@
-from david_web import lexicon
 from flask_sqlalchemy import SQLAlchemy
+
 
 db = SQLAlchemy()
 
@@ -18,11 +18,11 @@ class Room(db.Model):
     instances = []
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    display_name = db.Column(db.String(50), nullable=False)
+    english_name = db.Column(db.String(50), nullable=False) #TODO: Force to be capitalized
+    german_name = db.Column(db.String(100), nullable=False) #TODO: Force to be capitalized
     description = db.Column(db.String)
     image = db.Column(db.String)
     items = db.relationship('Item', backref='location')
-    characters = db.relationship('Character', backref='location')
 
     paths = db.relationship('Room', 
     secondary=paths, 
@@ -32,24 +32,28 @@ class Room(db.Model):
     lazy='dynamic'
     )
 
-    def __init__(self, name, description,  display_name, image=None):
+    def __init__(self, name, description,  english_name, german_name, image=None):
         self.name = name
         self.description = description
         self.image = image
-        self.display_name = display_name
+        self.english_name = english_name
+        self.german_name = german_name
         Room.instances.append(self)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     name = db.Column(db.String(50), nullable=False)
-    display_name = db.Column(db.String(50), nullable=False)
+    english_name = db.Column(db.String(50), nullable=False) #TODO: Force to be capitalized
+    german_name = db.Column(db.String(100), nullable=False) #TODO: Force to be capitalized
     takeable = db.Column(db.Boolean, nullable=False, default=False)
     location_id = db.Column(db.Integer, db.ForeignKey('room.id'))
     consume_lp = db.Column(db.Integer)
     consume_ap = db.Column(db.Integer)
     weapon_ap = db.Column(db.Integer)
+    fight_ap = db.Column(db.Integer)
+    fight_lp = db.Column(db.Integer)
     special = db.Column(db.String(100))
-    in_inventory = db.Column(db.Boolean, default=False)
+    amount_in_inventory = db.Column(db.Integer, default=0)
 
     recipes = db.relationship('Item',
     secondary=recipes,
@@ -58,14 +62,6 @@ class Item(db.Model):
     backref=db.backref('ingredients', lazy = 'dynamic'),
     lazy='dynamic')
 
-
-class Character(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), nullable=False)
-    display_name = db.Column(db.String(50), nullable=False)
-    location_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
-    attack_points = db.Column(db.Integer)
-    life_points = db.Column(db.Integer)
 
 START = 'davids_room'
 

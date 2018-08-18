@@ -3,3 +3,4 @@
 .pytest_cache
 to_do_list.txt
 config/secrets.py
+.vscode
