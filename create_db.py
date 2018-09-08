@@ -7,9 +7,6 @@ from sqlalchemy.exc import ProgrammingError
 
 db_creation = False
 # pylint: disable-all
-if __name__ == "__main__":
-    create_db()
-    db_creation = True
 
 def drop_table(target):
     try:
@@ -60,14 +57,20 @@ def set_up():
 
 
     chair = Item(name="chair", english_name="Chair", german_name="Sessel", location=davids_room)
-    gas_bottle = Item(name="gas_bottle", english_name="Gas Bottle", german_name="Gasflasche", location=living_room)
-    alarm_clock = Item(name="alarm_clock", english_name="Alarm Clock", german_name="Wecker", location=leons_room)
-    candle = Item(name="candle", english_name="Candle", german_name="Kerze", location=fridge)
+    gas_bottle = Item(name="gas_bottle", english_name="Gas Bottle", german_name="Gasflasche", location=living_room, takeable=True)
+    alarm_clock = Item(name="alarm_clock", english_name="Alarm Clock", german_name="Wecker", location=leons_room, takeable=True)
+    candle = Item(name="candle", english_name="Candle", german_name="Kerze", location=fridge, takeable=True)
     knife = Item(name="knife", english_name="Knife", german_name="Brotmesser", location=kitchen, weapon_ap=10, takeable=True)
     bomb = Item(name="bomb", english_name="Bomb", german_name="Bombe")
-    plant = Item(name="plant", english_name="Plant", german_name="Pflanze", location=davids_room, takeable=True)
+    plant = Item(name="plant", english_name="Plant", german_name="Pflanze", location=davids_room, takeable=True, consume_lp=10, special='vegan')
     monster = Item(name="monster", english_name="Hair Monster", german_name="Haar Monster", location=bathroom, fight_ap=20, fight_lp=140)
     bed = Item(name="bed", english_name="Bed", german_name="Bett", location=davids_room, fight_ap=0, fight_lp=10)
+    pfeffi = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=davids_room, consume_lp=5, consume_ap=5, special='drunk', takeable=True)
+    b12 = Item(name="b12", english_name="B12", german_name="B12", location=bathroom, takeable=True, consume_lp=20, consume_ap=10)
+    pfeffi2 = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=kitchen, consume_lp=5, consume_ap=5, special='drunk', takeable=True)
+    pfeffi3 = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=fridge, consume_lp=5, consume_ap=5, special='drunk', takeable=True)
+    paint = Item(name="paint", english_name="Paint", german_name="Farbe", location=davids_room, takeable=True)
+
     db.session.add(chair)
     db.session.add(gas_bottle)
     db.session.add(alarm_clock)
@@ -76,6 +79,10 @@ def set_up():
     db.session.add(plant)
     db.session.add(monster)
     db.session.add(bed)
+    db.session.add(pfeffi)
+    db.session.add(b12)
+    db.session.add(pfeffi2)
+    db.session.add(pfeffi3)
     db.session.commit()
 
     bomb.ingredients.append(gas_bottle)

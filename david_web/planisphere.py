@@ -95,7 +95,7 @@ rooms = {'davids_room': {'name': 'Davids Room',
                          'objects': ['monster', 'b12', 'toilette']},
          'fridge':      {'name': 'Fridge',
                          'description': 'Description of the Fridge',
-                         'paths': ['kitchen'],
+                         'paths': ['kitchen', 'hallway'],
                          'objects': ['pfeffi', 'kerze']}
 
          }

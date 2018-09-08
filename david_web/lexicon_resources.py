@@ -12,6 +12,9 @@ synonyms_dict = {
     'wohnzimmer': 'living_room',
     'kühlschrank': 'fridge',
     'zurück': 'back',
+    'schliesse': 'back',
+    'close': 'back',
+    'schliess': 'back',
     ### VERB SYNONYMS GERMAN ###
     'nimm': 'take',
     'nehmen': 'take',

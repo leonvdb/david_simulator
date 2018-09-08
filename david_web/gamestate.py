@@ -9,10 +9,11 @@ character_stats = {
     'Attack_Points': 20
 }
 
+inventory = {}
+taken_items = []
 
 states = []
 
-opponents = {'monster': {'ap': 20, 'lp': 140},
-             'bed': {'ap': 0, 'lp': 10}}
+opponents = {}
 
 room_log = ['davids_room']

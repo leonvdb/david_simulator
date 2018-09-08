@@ -88,11 +88,11 @@ def replace_synonyms(sentence):
             next_word = clean_words[position+1]
         else:
             next_word = None
-
-        if i in lexicon_resources.two_word_names and next_word in lexicon_resources.two_word_names[i]:
-            replace = lexicon_resources.two_word_names[i][next_word]
-            replaced.append(replace)
-            clean_words.pop(position+1)
+        if i in list(lexicon_resources.two_word_names.keys()):
+            if next_word.lower() in lexicon_resources.two_word_names[i]:
+                replace = lexicon_resources.two_word_names[i][next_word.lower()]
+                replaced.append(replace)
+                clean_words.pop(position+1)
         else:
             capitalized = i.capitalize()
             if i in list(lexicon_resources.synonyms_dict.keys()):
@@ -157,14 +157,17 @@ def get_original_input(sentence, mode):
     filtered_by_mode = []
     for i in clean_original_words:
         i_lower = i.lower()
-        scanned = scan(i)[0]
-        word_type = scanned[0]
-        # if i_lower in list(lexicon_resources.synonyms_dict.keys()):
+        if i_lower not in list(lexicon_resources.two_word_names.keys()):
+            scanned = scan(i_lower)[0]
+            word_type = scanned[0]
+            # if i_lower in list(lexicon_resources.synonyms_dict.keys()):
 
-        #     original_words_matched.append((word_type, i))
-        # elif i_lower == scanned[1]:
-        #     original_words_matched.append((word_type, i))
-        original_words_matched.append((word_type, i))
+            #     original_words_matched.append((word_type, i))
+            # elif i_lower == scanned[1]:
+            #     original_words_matched.append((word_type, i))
+            original_words_matched.append((word_type, i))
+        else:
+            pass
 
     if mode == 'objects':
         for i in original_words_matched:
