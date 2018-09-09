@@ -7,13 +7,18 @@ Feedback on the code is very much appreciated!
 
 To run:
 
-- Make sure you have the packages in requirements.txt. 
-- Create config/secrets.py and assign a secret key to secret_app_key
-
-  config/secrets.py:
-
+- Make sure you have the packages in requirements.txt.
+- Create and run a PostgreSQL database. 
+- Create config/secrets.py and assign a secret key and a database URI
+```python
   secret_app_key = 'YourSecretKey'
+  database_uri = 'YourPostgreSQLDatabaseUri'
+```
 
+- Run:
+```
+Python3.6 create_db.py
+Python3.6 app.py
+```
 
-- Run "Python3.6 app.py" in your Terminal
 - Go to http://localhost:5000/
