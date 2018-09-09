@@ -1,18 +1,32 @@
-from flask import Flask, session, redirect, url_for, escape, request
-from flask import render_template
+from flask import Flask, session, redirect, url_for, escape, request, render_template
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
+from david_web.planisphere import db
 from david_web import engine
 from david_web import gamestate
 from david_web import planisphere
-from config import secrets
+import create_db
+from config import secrets # pylint: disable-msg=E0611
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+db.init_app(app)
+db.app = app
+
 
 
 @app.route("/")
 def index():
     # this is used to "setup" the session with starting values
+    # session['database'] = 'refresh' #TODO: Add 'save session' feature or 'new session' option on start screen
     session['room_name'] = planisphere.START
     session['final_action'] = False
+    try:
+        create_db.set_up()
+    except OperationalError:
+        create_db.set_up()
+
     return redirect(url_for("game"))
 
 
@@ -29,17 +43,17 @@ def game():
             return render_template("you_died.html")
 
         if room_name:
-            room = engine.match_Room(room_name)
+            room = engine.match_room(room_name)
             return render_template("show_room.html", room=room, action_name=action_name)
         else:
-            # why is there here? do you need it?
+            #TODO: Add Error
             return render_template("you_died.html")
 
     else:
         action = request.form.get('action')
 
         if room_name and action:
-            room = engine.match_Room(room_name)
+            room = engine.match_room(room_name)
 
             action_instance = engine.Action(room, action)
             final_action = action_instance.determine_action()

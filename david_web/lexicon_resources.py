@@ -12,6 +12,9 @@ synonyms_dict = {
     'wohnzimmer': 'living_room',
     'kühlschrank': 'fridge',
     'zurück': 'back',
+    'schliesse': 'back',
+    'close': 'back',
+    'schliess': 'back',
     ### VERB SYNONYMS GERMAN ###
     'nimm': 'take',
     'nehmen': 'take',
@@ -40,7 +43,10 @@ synonyms_dict = {
     'bau': 'build',
     'bauen': 'build',
     'basteln': 'build',
-    'bastel': 'build'
+    'bastel': 'build',
+    ### ITEM SYNONYMS ###
+    'pflanze': 'plant',
+    'messer': 'knife'
 
 }
 

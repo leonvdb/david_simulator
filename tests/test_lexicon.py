@@ -10,23 +10,29 @@ def test_importing_names():
     paths_collection = collect_names('paths')
     assert 'hallway' in paths_collection
     objects_collection = collect_names('objects')
-    assert 'bett' in objects_collection
+    assert 'bed' in objects_collection
 
+def test_new_importing_names():
+    all_items = create_resources('item', 'name')
+    assert 'chair' in all_items
 
 def test_lexicon_results():
 
+    result = scan('bett')
+    assert result == [('object','bed')]
+
     result = scan('ich eat pflanze in   davids_room')
-    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'pflanze'),
+    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'plant'),
                       ('stop', 'in'), ('direction', 'davids_room')]
     result = scan('ich eat pflanze in   eingangsbereich')
     assert result == [('error', 'ich'), ('verb', 'consume'), ('object',
-                                                              'pflanze'), ('stop', 'in'), ('direction', 'hallway')]
+                                                              'plant'), ('stop', 'in'), ('direction', 'hallway')]
     result = scan('ich eat pflanze in   davids zimmer lololol!')
-    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'pflanze'),
+    assert result == [('error', 'ich'), ('verb', 'consume'), ('object', 'plant'),
                       ('stop', 'in'), ('direction', 'davids_room'), ('error', 'lololol')]
     result = scan('iss die pflanze auf!')
     assert result == [('verb', 'consume'), ('error', 'die'),
-                      ('object', 'pflanze'), ('error', 'auf')]
+                      ('object', 'plant'), ('error', 'auf')]
 
     result = get_original_input('iss den eingangsbereich auf', 'verbs')
     assert result == ['iss']
