@@ -26,8 +26,6 @@ def reset():
 def test_david_map():
     go_hallway = Action(davids_room, 'geh in den flur')
     assert go_hallway.determine_action() == 'hallway'
-    go_outside = Action(hallway, 'geh raus')
-    assert go_outside.determine_action() == 'outside'
 
 
 def test_Action():
@@ -99,10 +97,3 @@ def test_check_gamestate():
     test_action = Action(davids_room, 'gamestate')
     result = test_action.determine_action()
     assert 'Knife' in result
-
-
-
-def test_object_names():
-
-    test_scene = Room("Name", "Description", ['test_path'], ['object_1', 'object_2'])
-    assert test_scene.object_names == ['object_1', 'object_2']

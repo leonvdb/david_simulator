@@ -10,15 +10,21 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
+
+db.init_app(app)
+db.app = app
 
 class Room(object):
     instances = []
 
-    def __init__(self, name, description, paths, object_names):
+    def __init__(self, name, description, paths, object_names, id):
         self.name = name
         self.description = description
         self.paths = paths
         self.object_names = object_names
+        self.id = id
         Room.instances.append(self)
 
     def get_path(self, action):
@@ -31,8 +37,8 @@ class ProcessDirector:
     def __init__(self):
         self.allClasses = []
 
-    def construct(self, id_name, name, description, paths, objects):
-        instance = Room(name, description, paths, objects)
+    def construct(self, id_name, name, description, paths, objects, id):
+        instance = Room(name, description, paths, objects, id)
         self.allClasses.append(instance)
         ProcessDirector.instance_id[id_name] = instance
 
@@ -41,14 +47,11 @@ director = ProcessDirector()
 
 
 def initalise_rooms():
-    for i in list(planisphere.rooms.keys()):
-        i_data = planisphere.rooms.get(i)
-        name = i_data.get('name')
-        description = i_data.get('description')
-        paths = i_data.get('paths')
-        objects = i_data.get('objects')
-
-        director.construct(i, name, description, paths, objects)
+    for i in planisphere.Room.query.all():
+        paths = [j.name for j in i.connections.all()] + [j.name for j in i.paths.all()]
+        objects = [k.name for k in planisphere.Item.query.filter_by(location=i).all()]
+        
+        director.construct(i.name, i.english_name, i.description, paths, objects, i.id)
 
 
 initalise_rooms()
@@ -153,7 +156,6 @@ class Action(object):
         message = tuple_from_db[0]
         conn.close()
         message = dedent(message)
-        # message = dedent(error_messages.return_error_message(reason))
         message = message.format(verbs=self.verbs_original, verb_count=self.verb_count,
                                  objects=self.objects_original, object_count=self.object_count,
                                  directions=self.directions_original, direction_count=self.direction_count)
@@ -191,7 +193,12 @@ class Action(object):
         else:
             query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
 
-        if query_item.location.english_name != self.current_room.name or query_item.id in gamestate.taken_items: #TODO: Change from english_name to name when adapting Rooms to DB
+        if query_item.name not in self.current_room.object_names:
+            return self.error('object not in room')
+        else: 
+            current_location = planisphere.Room.query.filter_by(id=self.current_room.id).first()
+            query_item = planisphere.Item.query.filter_by(location=current_location, name=self.objects[0]).first()
+        if query_item.id in gamestate.taken_items:
             return self.error('object not in room')
         elif not query_item.takeable:
             return self.error('object not takeable')
@@ -283,7 +290,12 @@ class Action(object):
             query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
 
         if query_item.name not in gamestate.inventory:
-            if not query_item.location.english_name == self.current_room.name and query_item.id not in gamestate.taken_items:
+            if query_item.name not in self.current_room.object_names:
+                return self.error('food object not available')
+            else: 
+                current_location = planisphere.Room.query.filter_by(id=self.current_room.id).first()
+                query_item = planisphere.Item.query.filter_by(location=current_location, name=self.objects[0]).first()
+            if query_item.id in gamestate.taken_items:
                 return self.error('food object not available')
         if not query_item.consume_lp and not query_item.consume_ap:
             return self.error('food object not consumable')
@@ -305,18 +317,18 @@ class Action(object):
             
 
             message = f"""
-            David konsumiert {self.objects[0]}
+            David konsumiert {query_item.german_name}.
             """
             if consumable_ap:
  
                 gamestate.character_stats['Attack_Points'] = david_ap + consumable_ap
                 message = message + f"""
-                David bekommt {consumable_ap} Angriffspunkte von {self.objects[0]}.
+                David bekommt {consumable_ap} Angriffspunkte von {query_item.german_name}.
                 """
             if consumable_lp:
                 gamestate.character_stats['Health'] = david_lp + consumable_lp
                 message = message + f"""
-                David bekommt {consumable_lp} Lebenspunkte von {self.objects[0]}.
+                David bekommt {consumable_lp} Lebenspunkte von {query_item.german_name}.
                 """
             if consumable_special:             
                 gamestate.states.append(consumable_special)

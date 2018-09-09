@@ -10,7 +10,7 @@ def test_importing_names():
     paths_collection = collect_names('paths')
     assert 'hallway' in paths_collection
     objects_collection = collect_names('objects')
-    assert 'bett' in objects_collection
+    assert 'bed' in objects_collection
 
 def test_new_importing_names():
     all_items = create_resources('item', 'name')
