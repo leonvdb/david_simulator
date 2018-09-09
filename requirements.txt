@@ -1,2 +1,4 @@
 pytest==3.6.1
+Flask_SQLAlchemy==2.3.2
 Flask==1.0.2
+SQLAlchemy==1.2.9
