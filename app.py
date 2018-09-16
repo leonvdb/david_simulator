@@ -18,16 +18,11 @@ db.app = app
 
 @app.route("/")
 def index():
-    # this is used to "setup" the session with starting values
-    # session['database'] = 'refresh' #TODO: Add 'save session' feature or 'new session' option on start screen
     session['room_name'] = planisphere.START
     session['final_action'] = False
-    try:
-        create_db.set_up()
-    except OperationalError:
-        create_db.set_up()
 
-    return redirect(url_for("game"))
+    return render_template("index.html")
+    # return redirect(url_for("game"))
 
 
 @app.route("/game", methods=['GET', 'POST'])

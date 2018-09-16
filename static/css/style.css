@@ -1,0 +1,66 @@
+h1 {
+    margin :0px;
+}
+
+input[type=text] {
+    display: block;
+    width: 98%;
+    margin: auto;
+    background-color: rgba(0, 0, 0, 0.514);
+    opacity: 0.8;
+    border-radius: 10px;
+    border-color:  rgba(233, 233, 233, 0.884);
+    padding-left: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    color:  rgba(255, 255, 255, 0.952);
+    font-weight: 400;
+    font-size: 1.2em;
+    outline: none;
+    position: absolute;
+    bottom: 0.3%;
+    left: 0.5%;
+    
+}
+
+.output {
+    padding-left: 20px;
+    text-indent: -20px;
+    display: block;
+    max-width: 90%; 
+    overflow: hidden;
+    position: absolute;
+    bottom: 3.5%;
+    left: 1%;
+    font-family: 'Courier New', Courier, monospace;
+    color: white;
+}
+
+.ingame_menu {
+    position: absolute;
+    right: 0%;
+    color: White;
+}
+
+.menu {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    background-color: rgba(0, 0, 0, 0.514);
+    color: White;
+    font-family: 'Courier New', Courier, monospace;
+
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+}
+
+.menu a:hover {
+    color: gray;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}

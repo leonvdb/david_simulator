@@ -2,11 +2,31 @@
 <html>
   <head>
     <title>David Simulator</title>
+    <link rel="stylesheet" type="text/css "href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+    body, html {
+    height: 100%;
+    margin: 0%;
+    width: 100%;
+    }
+    
+
+.bg {
+    background-image: url({{ room.get_image() }});
+    background-color: grey;
+    height: 100%;
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+    </style>
   </head>
-  <body>
+  <body onload="document.action_form.action.focus();">
+    <div class="bg">
     {% block content %}
 
     {% endblock %}
-
+    </div>
   </body>
 </html>

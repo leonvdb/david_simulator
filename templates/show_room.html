@@ -11,17 +11,19 @@
 {% if room.name in ["death", "The End"] %}
     <p><a href ="/">Play Again?</a></p>
 {% else %}
-    <p>
-    <form action="/game" method="POST">
-        - <input type="text" name="action"> <input type="SUBMIT">
+    <form action="/game" method="POST" name="action_form" autocomplete="off" spellcheck="false">
+         <input type="text" name="action">
     </form>
-    </p>
 {% endif %}
 
 {% if action_name %}
-    <p>{{ action_name }}</p>
-
+<div class="output">
+    <p>> {{ action_name }}</p>
+</div>
 {% endif %}
-
+<div class=ingame_menu>
+    <p><a href="/">Home</a></p>
+</div>
 
 {% endblock %}
+

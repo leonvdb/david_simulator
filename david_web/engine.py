@@ -8,6 +8,7 @@ from config import secrets # pylint: disable-msg=E0611
 from textwrap import dedent
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.contrib.cache import SimpleCache
 import sqlite3
 
 app = Flask(__name__)
@@ -16,19 +17,29 @@ app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
 db.init_app(app)
 db.app = app
 
+cache = SimpleCache()
+
 class Room(object):
     instances = []
 
-    def __init__(self, name, description, paths, object_names, id):
+    def __init__(self, name, description, paths, object_names, db_id, image):
         self.name = name
         self.description = description
         self.paths = paths
         self.object_names = object_names
-        self.id = id
+        self.id = db_id
+        self.image = image
         Room.instances.append(self)
 
     def get_path(self, action):
         return self.paths.get(action, None)
+
+    def get_image(self):
+        image = cache.get(f"{self.name}_image")
+        if not image:
+            image = self.image
+            cache.set(f"{self.name}_image", image, timeout=5 * 60)
+        return image
 
 
 class ProcessDirector:
@@ -37,8 +48,8 @@ class ProcessDirector:
     def __init__(self):
         self.allClasses = []
 
-    def construct(self, id_name, name, description, paths, objects, id):
-        instance = Room(name, description, paths, objects, id)
+    def construct(self, id_name, name, description, paths, objects, db_id, image):
+        instance = Room(name, description, paths, objects, db_id, image)
         self.allClasses.append(instance)
         ProcessDirector.instance_id[id_name] = instance
 
@@ -51,7 +62,7 @@ def initalise_rooms():
         paths = [j.name for j in i.connections.all()] + [j.name for j in i.paths.all()]
         objects = [k.name for k in planisphere.Item.query.filter_by(location=i).all()]
         
-        director.construct(i.name, i.english_name, i.description, paths, objects, i.id)
+        director.construct(i.name, i.english_name, i.description, paths, objects, i.id, i.image)
 
 
 initalise_rooms()
@@ -199,7 +210,7 @@ class Action(object):
             current_location = planisphere.Room.query.filter_by(id=self.current_room.id).first()
             query_item = planisphere.Item.query.filter_by(location=current_location, name=self.objects[0]).first()
         if query_item.id in gamestate.taken_items:
-            return self.error('object not in room')
+            return self.error('object already taken')
         elif not query_item.takeable:
             return self.error('object not takeable')
         else:
@@ -235,6 +246,8 @@ class Action(object):
         else:
             if self.object_count == 2 and self.with_action == True:
                 query_weapon = planisphere.Item.query.filter_by(name=self.objects[1]).first()
+                if query_weapon.name not in gamestate.inventory:
+                    return self.error('weapon not in inventory')
                 if not query_weapon.weapon_ap:
                     return self.error('not a valid weapon')
             if self.objects[0] in list(special_actions.attack.keys()):

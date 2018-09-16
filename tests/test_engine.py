@@ -67,7 +67,7 @@ def test_take():
     assert result == "\nDas Objekt \"Farbe\" wurde deinem Inventar hinzugefügt!\n"
     test_action = Action(davids_room, 'nimm die pflanze')
     result = test_action.determine_action()
-    assert 'befindet sich nicht in diesem Bereich.' in result
+    assert 'Das angegebene Objekt "pflanze" wurde schon aus dem Raum entfernt. ' in result
     test_action = Action(davids_room, 'gamestate')
     result = test_action.determine_action()
     assert 'Paint' in result
@@ -76,7 +76,7 @@ def test_take():
     assert result == '\nDas angegebene objekt "Bett" kannst du leider nicht aufnehmen.\n'
     test_action = Action(davids_room, 'greif das Bett mit der Pflanze an!')
     result = test_action.determine_action()
-    assert result == '\nDas Objekt "Pflanze" kannst du nicht als Waffe benutzen.\n'
+    assert 'nicht in deinem Inventar' in result
 
 def test_consume():
     test_action = Action(davids_room, 'nimm den pfeffi')
