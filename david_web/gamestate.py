@@ -1,5 +1,5 @@
 from david_web import planisphere
-from flask import Flask, session
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import secrets # pylint: disable-msg=E0611
 from david_web.planisphere import db

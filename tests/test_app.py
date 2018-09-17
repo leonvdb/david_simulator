@@ -39,8 +39,10 @@ def test_index(client):
 
 def test_game(client):
 
-    rv = client.get('/game', follow_redirects=True)
-    assert rv.status_code, 200
+    rv = client.get('/', follow_redirects=True)
+    assert rv.status_code == 200
+    data = {'new_game': True}
+    rv = client.post('/', follow_redirects=True, data=data)
     assert b"Davids Room" in rv.data
 
     data = {'action': 'geh zurück'}
@@ -56,10 +58,10 @@ def test_game(client):
 
 def test_back_home(new_client):
 
-    new_client.get('/', follow_redirects=True)
-
-    rv = new_client.get('/game', follow_redirects=True)
-    assert rv.status_code, 200
+    rv = new_client.get('/', follow_redirects=True)
+    assert rv.status_code == 200
+    data = {'new_game': True}
+    rv = new_client.post('/', follow_redirects=True, data=data)
     assert b"Davids Room" in rv.data
 
     data = {'action': 'greif die pflanze an'}
@@ -281,10 +283,10 @@ def test_back_home(new_client):
 
 def test_errors(new_client):
 
-    new_client.get('/', follow_redirects=True)
-
-    rv = new_client.get('/game', follow_redirects=True)
-    assert rv.status_code, 200
+    rv = new_client.get('/', follow_redirects=True)
+    assert rv.status_code == 200
+    data = {'new_game': True}
+    rv = new_client.post('/', follow_redirects=True, data=data)
     assert b"Davids Room" in rv.data
 
     data = {'action': 'geh geh geh!'}

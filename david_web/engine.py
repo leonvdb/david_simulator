@@ -84,16 +84,6 @@ def match_room(name):
     return instance
 
 def get_inventory():
-   
-    # app = Flask(__name__)
-    # app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
-
-    # db.init_app(app)
-    # db.app = app
-
-    # inventory_list = []
-    # for i in planisphere.Item.query.filter(planisphere.Item.amount_in_inventory > 0).all():
-    #     inventory_list.append(i.name)
 
     return gamestate.inventory
 
@@ -133,7 +123,7 @@ class Action(object):
             elif i[1] == 'with':
                 self.with_action = True
 
-    def determine_action(self):
+    def determine_action(self, request_mode=None):
 
         self.scan_action()
 
@@ -148,7 +138,7 @@ class Action(object):
         elif 'consume' in self.verbs:
             return self.consume()
         elif 'attack' in self.verbs:
-            return self.attack()
+            return self.attack(request_mode)
         elif 'take' in self.verbs:
             return self.take()
         elif 'gamestate' in self.verbs:
@@ -157,6 +147,7 @@ class Action(object):
             return self.build()
         else:
             pass
+    
 
     def error(self, reason):
         self.action_type = 'error'
@@ -225,7 +216,7 @@ class Action(object):
             Das Objekt \"{query_item.german_name}\" wurde deinem Inventar hinzugefügt!
             """)
 
-    def attack(self):
+    def attack(self, request_mode):
         self.action_type = 'attack'
         if self.object_count > 1 and self.with_action == False:
             return self.error('too many opponents')

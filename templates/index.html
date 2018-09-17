@@ -3,7 +3,7 @@
 
 <head>
     <title>David Simulator</title>
-    <link rel="stylesheet" type="text/css "href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css " href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         body,
         html {
@@ -24,16 +24,15 @@
         }
     </style>
 </head>
-
 <Body>
     <div class=bg>
         <div class=menu>
-            <ul>
-                <li><a href="/game">Neues Spiel</a></li>
-                <li><a href="/tutorial">Tutorial</a></li>
-                <li><a href="/credits">Credits</a></li>
-            </ul>
-          
+            <form action="/" method="POST">
+                <button type="submit" name="new_game" value=True>Neues Spiel</button>
+                {% if player_data %}
+                <button type="submit" name="continue_game" value=True>Spiel fortsetzten</button>
+                {% endif %}
+            </form>
         </div>
     </div>
 </Body>

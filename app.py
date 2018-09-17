@@ -16,21 +16,45 @@ db.app = app
 
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
-    session['room_name'] = planisphere.START
-    session['final_action'] = False
+    if request.method == "GET":
+        if session.get('room_name'):
+            player_data = True
+        else:
+            player_data = False 
+        return render_template("index.html", player_data=player_data)
+        
+        
+    else: 
+        new_game = request.form.get('new_game')
+        continue_game = request.form.get('continue_game')
+        if new_game:
+            session['room_name'] = planisphere.START
+            session['final_action'] = False
+            return redirect(url_for("game"))
+        elif continue_game:
+            return redirect(url_for("game"))
+        else:
+            #TODO: Add Error
+            return render_template("error.html")
+        
+    
 
-    return render_template("index.html")
-    # return redirect(url_for("game"))
 
 
 @app.route("/game", methods=['GET', 'POST'])
 def game():
+    session['character_stats'] = {
+    'Health': 100,
+    'Attack_Points': 20
+}
     session['lifepoints'] = gamestate.character_stats.get('Health')
+    character_stats = session.get('character_stats')
     action_name = session.get('final_action')
     room_name = session.get('room_name')
     david_lp = session.get('lifepoints')
+    # david_lp = character_stats.get('Health')
 
     if request.method == "GET":
 
