@@ -1,5 +1,3 @@
-### To run without import error comment out get_inventory() function in gamestate.py ###
-
 from app import db
 from david_web.planisphere import Item, Room, paths, recipes 
 from sqlalchemy.exc import ProgrammingError

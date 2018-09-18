@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
 from david_web.planisphere import db
 from david_web import engine
-from david_web import gamestate
 from david_web import planisphere
 import create_db
 from config import secrets # pylint: disable-msg=E0611
@@ -19,7 +18,7 @@ db.app = app
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == "GET":
-        if session.get('room_name'):
+        if session.get('room_name') and session.get('alive'):
             player_data = True
         else:
             player_data = False 
@@ -29,9 +28,21 @@ def index():
     else: 
         new_game = request.form.get('new_game')
         continue_game = request.form.get('continue_game')
-        if new_game:
+        if new_game: #TODO: Add - are you sure? prompt
             session['room_name'] = planisphere.START
+            session['alive'] = True
             session['final_action'] = False
+            session['data_dict'] = {'final_action' : False,
+                'character' : {
+                    'Health': 100,
+                    'Attack_Points': 20,
+                    'States' : [],
+                    'Inventory' : {}
+                    },
+                'opponents' : {},
+                'taken_items' : [],
+                'room_log' : ['davids_room']
+        }
             return redirect(url_for("game"))
         elif continue_game:
             return redirect(url_for("game"))
@@ -49,16 +60,15 @@ def game():
     'Health': 100,
     'Attack_Points': 20
 }
-    session['lifepoints'] = gamestate.character_stats.get('Health')
-    character_stats = session.get('character_stats')
     action_name = session.get('final_action')
     room_name = session.get('room_name')
-    david_lp = session.get('lifepoints')
-    # david_lp = character_stats.get('Health')
+    data_dict = session.get('data_dict')
+    david_lp = data_dict.get('character').get('Health')
 
     if request.method == "GET":
 
         if david_lp <= 0:
+            session['alive'] = False
             return render_template("you_died.html")
 
         if room_name:
@@ -74,16 +84,18 @@ def game():
         if room_name and action:
             room = engine.match_room(room_name)
 
-            action_instance = engine.Action(room, action)
+            action_instance = engine.Action(room, action, data_dict)
             final_action = action_instance.determine_action()
 
             if action_instance.action_type != 'go':
 
                 session['room_name'] = engine.name_room(room)
-                session['final_action'] = final_action
+                session['final_action'] = final_action.get('final_action')
+                session['data_dict'] = final_action
             else:
 
-                session['room_name'] = final_action
+                session['room_name'] = final_action.get('final_action')
+                session['data_dict'] = final_action
                 session['final_action'] = False
 
         return redirect(url_for("game"))

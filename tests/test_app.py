@@ -1,6 +1,5 @@
 from app import app
 from david_web import engine
-from david_web import gamestate
 
 import pytest
 
@@ -121,8 +120,6 @@ def test_back_home(new_client):
     assert b'gemuetlich' in rv.data
     assert b'30' in rv.data
     assert b'Bett' in rv.data
-    assert gamestate.opponents['bed']['lp'] == -20
-    assert 'müde' in gamestate.states
 
     data = {'action': 'greif das bett an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
@@ -187,7 +184,6 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"Candle" not in rv.data
-    assert 3 in gamestate.taken_items
     assert b"Bomb" in rv.data
 
     data = {'action': 'bau eine Kerze'}
@@ -218,14 +214,10 @@ def test_back_home(new_client):
     data = {'action': 'iss das B12'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
-    assert gamestate.character_stats.get('Health') == 120
-    assert gamestate.character_stats.get('Attack_Points') == 30
-    assert 10 in gamestate.taken_items
 
     data = {'action': 'greif das monster an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
-    assert gamestate.character_stats.get('Health') == 100
     assert b'David hat noch 100' in rv.data
 
     data = {'action': 'geh in den flur'}
@@ -241,8 +233,6 @@ def test_back_home(new_client):
     data = {'action': 'iss die pflanze auf'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
-    assert gamestate.character_stats.get('Health') == 110
-    assert 'vegan' in gamestate.states
 
     data = {'action': 'geh in den flur'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
@@ -267,7 +257,6 @@ def test_back_home(new_client):
     data = {'action': 'nimm den pfeffi'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
-    assert {'bomb': 1, 'knife': 1, 'pfeffi': 1} == gamestate.inventory
 
     data = {'action': 'trink den pfeffi'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

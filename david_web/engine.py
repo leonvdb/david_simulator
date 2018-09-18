@@ -1,5 +1,4 @@
 from david_web import lexicon
-from david_web import gamestate
 from david_web import planisphere
 from david_web.planisphere import db
 from david_web import special_actions
@@ -83,15 +82,11 @@ def match_room(name):
     instance = ProcessDirector.instance_id.get(name)
     return instance
 
-def get_inventory():
-
-    return gamestate.inventory
-
-
 class Action(object):
 
-    def __init__(self, current_room, action):
+    def __init__(self, current_room, action, data_dict):
         self.current_room = current_room
+        self.data_dict = data_dict
         self.action = action
         self.verbs = []
         self.verbs_original = lexicon.get_original_input(action, 'verbs')
@@ -148,7 +143,6 @@ class Action(object):
         else:
             pass
     
-
     def error(self, reason):
         self.action_type = 'error'
         conn = sqlite3.connect(configuration.error_messages_path)
@@ -164,13 +158,14 @@ class Action(object):
         message = message.replace('[', '')
         message = message.replace(']', '')
         message = message.replace("'", "")
-        return message
+        self.data_dict['final_action'] = message 
+        return self.data_dict
 
     def gamestate(self):
-        lp = gamestate.character_stats.get('Health')
-        ap = gamestate.character_stats.get('Attack_Points')
+        lp = self.data_dict['character'].get('Health')
+        ap = self.data_dict['character'].get('Attack_Points')
         inventory_list = []
-        for k, v in gamestate.inventory.items():
+        for k, v in self.data_dict['character']['Inventory'].items():
             query_item = planisphere.Item.query.filter_by(name=k).first()
             if v > 1:
                 inventory_list.append(f'{query_item.english_name} ({v}x)')
@@ -179,11 +174,13 @@ class Action(object):
 
         invetory_str = ','.join(inventory_list)
 
-        return dedent(f"""
+        message = dedent(f"""
         Lebenspunkte: {lp}
         Angriffspunkte: {ap}
         Inventar: {invetory_str}
         """)
+        self.data_dict['final_action'] = message 
+        return self.data_dict
 
     def take(self):
 
@@ -200,21 +197,23 @@ class Action(object):
         else: 
             current_location = planisphere.Room.query.filter_by(id=self.current_room.id).first()
             query_item = planisphere.Item.query.filter_by(location=current_location, name=self.objects[0]).first()
-        if query_item.id in gamestate.taken_items:
+        if query_item.id in self.data_dict['taken_items']:
             return self.error('object already taken')
         elif not query_item.takeable:
             return self.error('object not takeable')
         else:
-            if query_item.name not in list(gamestate.inventory.keys()):
-                gamestate.inventory[query_item.name] = 1
-                gamestate.taken_items.append(query_item.id)
+            if query_item.name not in list(self.data_dict['character']['Inventory'].keys()):
+                self.data_dict['character']['Inventory'][query_item.name] = 1
+                self.data_dict['taken_items'].append(query_item.id)
             else:
-                gamestate.inventory[query_item.name] += 1
-                gamestate.taken_items.append(query_item.id)
+                self.data_dict['character']['Inventory'][query_item.name] += 1
+                self.data_dict['taken_items'].append(query_item.id)
 
-            return dedent(f"""
+            message = dedent(f"""
             Das Objekt \"{query_item.german_name}\" wurde deinem Inventar hinzugefügt!
             """)
+            self.data_dict['final_action'] = message 
+            return self.data_dict
 
     def attack(self, request_mode):
         self.action_type = 'attack'
@@ -237,7 +236,7 @@ class Action(object):
         else:
             if self.object_count == 2 and self.with_action == True:
                 query_weapon = planisphere.Item.query.filter_by(name=self.objects[1]).first()
-                if query_weapon.name not in gamestate.inventory:
+                if query_weapon.name not in self.data_dict['character']['Inventory']:
                     return self.error('weapon not in inventory')
                 if not query_weapon.weapon_ap:
                     return self.error('not a valid weapon')
@@ -245,29 +244,27 @@ class Action(object):
                 action_data = special_actions.attack.get(self.objects[0])
                 if action_data.get('message') != 'none':
                     self.special_message = action_data.get('message')
-                if action_data.get('special_action'):
-                    special_actions.special_attack(self)
-            if query_opponent.name not in gamestate.opponents.keys():
-                gamestate.opponents[query_opponent.name] = {'ap': query_opponent.fight_ap, 'lp': query_opponent.fight_lp}
+            if query_opponent.name not in self.data_dict['opponents'].keys():
+                self.data_dict['opponents'][query_opponent.name] = {'ap': query_opponent.fight_ap, 'lp': query_opponent.fight_lp}
 
-            opp_data = gamestate.opponents.get(self.objects[0])
+            opp_data = self.data_dict['opponents'].get(self.objects[0])
             opp_lp = opp_data.get('lp')
             if opp_lp <= 0:
                 return self.error('opponent already dead')
 
             else:
                 opp_ap = opp_data.get('ap')
-                david_ap = gamestate.character_stats.get('Attack_Points')
+                david_ap = self.data_dict['character'].get('Attack_Points')
                 if self.with_action:
                     weapon_attack = query_weapon.weapon_ap
                     david_ap = david_ap + weapon_attack
-                david_lp = gamestate.character_stats.get('Health')
-                gamestate.opponents[self.objects[0]]['lp'] = opp_lp - david_ap
-                gamestate.character_stats['Health'] = david_lp - opp_ap
+                david_lp = self.data_dict['character'].get('Health')
+                self.data_dict['opponents'][self.objects[0]]['lp'] = opp_lp - david_ap
+                self.data_dict['character']['Health'] = david_lp - opp_ap
                 # get updated data
-                opp_data = gamestate.opponents.get(self.objects[0])
+                opp_data = self.data_dict['opponents'].get(self.objects[0])
                 opp_lp = opp_data.get('lp')
-                david_lp = gamestate.character_stats.get('Health')
+                david_lp = self.data_dict['character'].get('Health')
                 message = f"""
                 David im Kampf gegen {query_opponent.german_name}! """
                 if self.special_message != None:
@@ -282,7 +279,8 @@ class Action(object):
                     message = message + f"""
                     Du hast {query_opponent.german_name} besiegt!
                     """
-                return message
+                self.data_dict['final_action'] = message 
+                return self.data_dict
 
     def consume(self):
         self.action_type = 'consume'
@@ -293,28 +291,28 @@ class Action(object):
         else:
             query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
 
-        if query_item.name not in gamestate.inventory:
+        if query_item.name not in self.data_dict['character']['Inventory']:
             if query_item.name not in self.current_room.object_names:
                 return self.error('food object not available')
             else: 
                 current_location = planisphere.Room.query.filter_by(id=self.current_room.id).first()
                 query_item = planisphere.Item.query.filter_by(location=current_location, name=self.objects[0]).first()
-            if query_item.id in gamestate.taken_items:
+            if query_item.id in self.data_dict['taken_items']:
                 return self.error('food object not available')
         if not query_item.consume_lp and not query_item.consume_ap:
             return self.error('food object not consumable')
         else:
-            if self.objects[0] in gamestate.inventory:
-                if gamestate.inventory[self.objects[0]] > 1:
-                    gamestate.inventory[self.objects[0]] -= 1
-                elif gamestate.inventory[self.objects[0]] == 1:
-                    del gamestate.inventory[self.objects[0]]
-            elif query_item.location.english_name == self.current_room.name and query_item.id not in gamestate.taken_items: #TODO: Change from english_name to name when adapting Rooms to DB
+            if self.objects[0] in self.data_dict['character']['Inventory']:
+                if self.data_dict['character']['Inventory'][self.objects[0]] > 1:
+                    self.data_dict['character']['Inventory'][self.objects[0]] -= 1
+                elif self.data_dict['character']['Inventory'][self.objects[0]] == 1:
+                    del self.data_dict['character']['Inventory'][self.objects[0]]
+            elif query_item.location.english_name == self.current_room.name and query_item.id not in self.data_dict['taken_items']: #TODO: Change from english_name to name when adapting Rooms to DB
                 # TODO: Write test for this case
-                gamestate.taken_items.append(query_item.id)
+                self.data_dict['taken_items'].append(query_item.id)
 
-            david_ap = gamestate.character_stats.get('Attack_Points')
-            david_lp = gamestate.character_stats.get('Health')
+            david_ap = self.data_dict['character'].get('Attack_Points')
+            david_lp = self.data_dict['character'].get('Health')
             consumable_ap = query_item.consume_ap
             consumable_lp = query_item.consume_lp
             consumable_special = query_item.special
@@ -325,21 +323,22 @@ class Action(object):
             """
             if consumable_ap:
  
-                gamestate.character_stats['Attack_Points'] = david_ap + consumable_ap
+                self.data_dict['character']['Attack_Points'] = david_ap + consumable_ap
                 message = message + f"""
                 David bekommt {consumable_ap} Angriffspunkte von {query_item.german_name}.
                 """
             if consumable_lp:
-                gamestate.character_stats['Health'] = david_lp + consumable_lp
+                self.data_dict['character']['Health'] = david_lp + consumable_lp
                 message = message + f"""
                 David bekommt {consumable_lp} Lebenspunkte von {query_item.german_name}.
                 """
             if consumable_special:             
-                gamestate.states.append(consumable_special)
+                self.data_dict['character']['States'].append(consumable_special)
                 message = message + f"""
                 David erhät neuen Status {consumable_special}.
                 """
-            return message
+            self.data_dict['final_action'] = message 
+            return self.data_dict
 
     def go(self):
 
@@ -347,11 +346,13 @@ class Action(object):
             self.action_type = 'go'
 
             if self.directions[0] in self.current_room.paths:
-                gamestate.room_log.append(self.directions[0])
-                return self.directions[0]
-            elif self.directions[0] == 'back' and len(gamestate.room_log) > 1:
-                return gamestate.room_log[len(gamestate.room_log) - 2]
-            elif self.directions[0] == 'back' and len(gamestate.room_log) <= 1:
+                self.data_dict['room_log'].append(self.directions[0])
+                self.data_dict['final_action'] = self.directions[0]
+                return self.data_dict
+            elif self.directions[0] == 'back' and len(self.data_dict['room_log']) > 1:
+                self.data_dict['final_action'] = self.data_dict['room_log'][len(self.data_dict['room_log']) - 2]
+                return self.data_dict
+            elif self.directions[0] == 'back' and len(self.data_dict['room_log']) <= 1:
                 return self.error('cannot go back')
 
             else:
@@ -375,37 +376,44 @@ class Action(object):
             available = []
             missing = []
             for i in ingredients:
-                if i.name in list(gamestate.inventory.keys()) or i.location.name == self.current_room.name:
+                if i.name in list(self.data_dict['character']['Inventory'].keys()) or i.location.name == self.current_room.name:
                     available.append(i.german_name)
                 else:
                     missing.append(i.german_name)
 
             if not missing:
 
-                if query_item.name not in list(gamestate.inventory.keys()):
-                    gamestate.inventory[query_item.name] = 1
-                    gamestate.taken_items.append(query_item.id)
+                if query_item.name not in list(self.data_dict['character']['Inventory'].keys()):
+                    self.data_dict['character']['Inventory'][query_item.name] = 1
+                    self.data_dict['taken_items'].append(query_item.id)
                 else:
-                    gamestate.inventory[query_item.name] += 1
-                    gamestate.taken_items.append(query_item.id)
+                    self.data_dict['character']['Inventory'][query_item.name] += 1
+                    self.data_dict['taken_items'].append(query_item.id)
 
                 for i in ingredients:
 
-                    if i.name in gamestate.inventory:
-                        if gamestate.inventory[i.name] > 1:
-                            gamestate.inventory[i.name] -= 1
-                        elif gamestate.inventory[i.name] == 1:
-                            del gamestate.inventory[i.name]
-                    elif i.location.english_name == self.current_room.name and i.id not in gamestate.taken_items: #TODO: Change from english_name to name when adapting Rooms to DB
+                    if i.name in self.data_dict['character']['Inventory']:
+                        if self.data_dict['character']['Inventory'][i.name] > 1:
+                            self.data_dict['character']['Inventory'][i.name] -= 1
+                        elif self.data_dict['character']['Inventory'][i.name] == 1:
+                            del self.data_dict['character']['Inventory'][i.name]
+                    elif i.location.english_name == self.current_room.name and i.id not in self.data_dict['taken_items']: #TODO: Change from english_name to name when adapting Rooms to DB
                         # TODO: Write test for this case
-                        gamestate.taken_items.append(i.id)
+                        self.data_dict['taken_items'].append(i.id)
 
-                return dedent(f"""
+                message = dedent(f"""
                 Du hast erfolgreich das Objekt {self.objects_original[0]} gebaut!
                 Es wurde deinem Inventar hinzugefügt!
                 """)
+
+                self.data_dict['final_action'] = message 
+                return self.data_dict
+
             else:
-                return dedent(f"""
+                message =  dedent(f"""
                 Du kannst das Objekt {self.objects_original[0]} noch nicht bauen.
                 Dir fehlen noch folgende Objekte: {missing}.
                 """)
+
+                self.data_dict['final_action'] = message 
+                return self.data_dict
