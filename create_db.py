@@ -13,7 +13,7 @@ def drop_table(target):
         pass
 
 def set_up():
-
+    print("Database set up initialzing.")
     db.engine.execute("""SELECT pg_terminate_backend(pg_stat_activity.pid)
                          FROM pg_stat_activity
                          WHERE pg_stat_activity.datname = 'david_web'
@@ -59,7 +59,7 @@ def set_up():
     gas_bottle = Item(name="gas_bottle", english_name="Gas Bottle", german_name="Gasflasche", location=living_room, takeable=True)
     alarm_clock = Item(name="alarm_clock", english_name="Alarm Clock", german_name="Wecker", location=leons_room, takeable=True)
     candle = Item(name="candle", english_name="Candle", german_name="Kerze", location=fridge, takeable=True)
-    knife = Item(name="knife", english_name="Knife", german_name="Brotmesser", location=kitchen, weapon_ap=10, takeable=True)
+    knife = Item(name="knife", english_name="Knife", german_name="Brotmesser", location=kitchen, weapon_ap=10, consume_lp=-100, takeable=True)
     bomb = Item(name="bomb", english_name="Bomb", german_name="Bombe")
     plant = Item(name="plant", english_name="Plant", german_name="Pflanze", location=davids_room, takeable=True, consume_lp=10, special='vegan')
     monster = Item(name="monster", english_name="Hair Monster", german_name="Haar Monster", location=bathroom, fight_ap=20, fight_lp=140)
@@ -89,11 +89,6 @@ def set_up():
     bomb.ingredients.append(alarm_clock)
     db.session.commit()
     db.session.close()
+    print("Database succesfully created.")
 
-# def check_db_status(status): #TODO: Either use this to add 'new session' feature on start screen or get rid of it.
-#     if status == 'refresh':
-#         set_up()
-#     else:
-#         return "Not refresh :("
-
-    
+set_up()

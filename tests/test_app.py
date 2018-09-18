@@ -196,7 +196,7 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b"Hallway" in rv.data
 
-    data = {'action': 'iss das messer auf'}
+    data = {'action': 'iss die bombe auf'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b'kannst du nicht' in rv.data

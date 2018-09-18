@@ -2,10 +2,12 @@ from flask import Flask, session, redirect, url_for, escape, request, render_tem
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
 from david_web.planisphere import db
-from david_web import engine
 from david_web import planisphere
-import create_db
 from config import secrets # pylint: disable-msg=E0611
+import sys
+
+if __name__ == "__main__" or "pytest" in sys.modules:
+    from david_web import engine
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
