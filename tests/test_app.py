@@ -126,6 +126,11 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b'besiegt' in rv.data
 
+    data = {'action': 'gamestate'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b"muede" in rv.data
+
     data = {'action': 'greif das bett an'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -169,6 +174,12 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"Leons Room" in rv.data
+
+    data = {'action': 'greif Leon an'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b"Leons Room" in rv.data
+    assert b"besiegt" in rv.data
 
     data = {'action': 'nimm den Wecker'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

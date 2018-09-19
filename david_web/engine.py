@@ -7,7 +7,6 @@ from config import secrets # pylint: disable-msg=E0611
 from textwrap import dedent
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.contrib.cache import SimpleCache
 import sqlite3
 
 app = Flask(__name__)
@@ -16,29 +15,21 @@ app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
 db.init_app(app)
 db.app = app
 
-cache = SimpleCache()
 
 class Room(object):
     instances = []
 
-    def __init__(self, name, description, paths, object_names, db_id, image):
+    def __init__(self, name, description, paths, object_names, db_id):
         self.name = name
         self.description = description
         self.paths = paths
         self.object_names = object_names
         self.id = db_id
-        self.image = image
         Room.instances.append(self)
 
     def get_path(self, action):
         return self.paths.get(action, None)
 
-    def get_image(self):
-        image = cache.get(f"{self.name}_image")
-        if not image:
-            image = self.image
-            cache.set(f"{self.name}_image", image, timeout=5 * 60)
-        return image
 
 
 class ProcessDirector:
@@ -47,8 +38,8 @@ class ProcessDirector:
     def __init__(self):
         self.allClasses = []
 
-    def construct(self, id_name, name, description, paths, objects, db_id, image):
-        instance = Room(name, description, paths, objects, db_id, image)
+    def construct(self, id_name, name, description, paths, objects, db_id):
+        instance = Room(name, description, paths, objects, db_id)
         self.allClasses.append(instance)
         ProcessDirector.instance_id[id_name] = instance
 
@@ -61,7 +52,7 @@ def initalise_rooms():
         paths = [j.name for j in i.connections.all()] + [j.name for j in i.paths.all()]
         objects = [k.name for k in planisphere.Item.query.filter_by(location=i).all()]
         
-        director.construct(i.name, i.english_name, i.description, paths, objects, i.id, i.image)
+        director.construct(i.name, i.english_name, i.description, paths, objects, i.id)
 
 
 initalise_rooms()
@@ -164,6 +155,7 @@ class Action(object):
     def gamestate(self):
         lp = self.data_dict['character'].get('Health')
         ap = self.data_dict['character'].get('Attack_Points')
+        states = self.data_dict['character'].get('States')
         inventory_list = []
         for k, v in self.data_dict['character']['Inventory'].items():
             query_item = planisphere.Item.query.filter_by(name=k).first()
@@ -173,11 +165,13 @@ class Action(object):
                 inventory_list.append(query_item.english_name)
 
         invetory_str = ','.join(inventory_list)
+        states_str = ','.join(states)
 
         message = dedent(f"""
         Lebenspunkte: {lp}
         Angriffspunkte: {ap}
         Inventar: {invetory_str}
+        States: {states_str}
         """)
         self.data_dict['message'] = message 
         return self.data_dict
@@ -266,10 +260,7 @@ class Action(object):
                 opp_lp = opp_data.get('lp')
                 david_lp = self.data_dict['character'].get('Health')
                 message = f"""
-                David im Kampf gegen {query_opponent.german_name}! """
-                if self.special_message != None:
-                    message = message + self.special_message
-                message = message + f"""
+                David im Kampf gegen {query_opponent.german_name}!
                 David fügt {query_opponent.german_name} {david_ap} Schaden zu.
                 {query_opponent.german_name} hat noch {opp_lp} Lebenspunkte.
                 {query_opponent.german_name} fügt David {opp_ap} Schaden zu.
@@ -280,7 +271,7 @@ class Action(object):
                     Du hast {query_opponent.german_name} besiegt!
                     """
                 self.data_dict['message'] = message 
-                return self.data_dict
+                return special_actions.special_actions(self,self.data_dict)
 
     def consume(self):
         self.action_type = 'consume'
@@ -350,12 +341,14 @@ class Action(object):
                 self.data_dict['room_name'] = self.directions[0]
                 query_room=planisphere.Room.query.filter_by(name=self.directions[0]).first()
                 self.data_dict['message'] = query_room.description
-                return self.data_dict
+                self.data_dict['image'] = query_room.image
+                return special_actions.special_actions(self,self.data_dict)
             elif self.directions[0] == 'back' and len(self.data_dict['room_log']) > 1:
                 self.data_dict['room_name'] = self.data_dict['room_log'][len(self.data_dict['room_log']) - 2]
                 query_room=planisphere.Room.query.filter_by(name=self.data_dict['room_name']).first()
                 self.data_dict['message'] = query_room.description
-                return self.data_dict
+                self.data_dict['image'] = query_room.image
+                return special_actions.special_actions(self,self.data_dict)
             elif self.directions[0] == 'back' and len(self.data_dict['room_log']) <= 1:
                 return self.error('cannot go back')
 

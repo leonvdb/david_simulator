@@ -69,6 +69,7 @@ def set_up():
     pfeffi2 = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=kitchen, consume_lp=5, consume_ap=5, special='drunk', takeable=True)
     pfeffi3 = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=fridge, consume_lp=5, consume_ap=5, special='drunk', takeable=True)
     paint = Item(name="paint", english_name="Paint", german_name="Farbe", location=davids_room, takeable=True)
+    leon = Item(name="leon", english_name="Leon", german_name="Leon", location=leons_room, fight_ap=0, fight_lp=10)
 
     db.session.add(chair)
     db.session.add(gas_bottle)
@@ -82,6 +83,7 @@ def set_up():
     db.session.add(b12)
     db.session.add(pfeffi2)
     db.session.add(pfeffi3)
+    db.session.add(leon)
     db.session.commit()
 
     bomb.ingredients.append(gas_bottle)

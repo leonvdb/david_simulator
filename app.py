@@ -4,6 +4,7 @@ from sqlalchemy.exc import OperationalError
 from david_web.planisphere import db
 from david_web import planisphere
 from config import secrets # pylint: disable-msg=E0611
+from werkzeug.contrib.cache import SimpleCache
 import sys
 
 if __name__ == "__main__" or "pytest" in sys.modules:
@@ -15,6 +16,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
 db.init_app(app)
 db.app = app
 
+cache = SimpleCache()
+
+def cache_image(image_input):
+        image = cache.get(image_input)
+        if not image:
+            image = image_input
+            cache.set(image_input, image, timeout=5 * 60)
+        return image
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -34,6 +43,7 @@ def index():
             session['room_name'] = planisphere.START
             session['alive'] = True
             session['data_dict'] = {'message' : False,
+            'image' : 'static/images/davids_room.jpg',
             'room_name': 'davids_room',
                 'character' : {
                     'Health': 100,
@@ -64,6 +74,7 @@ def game():
 }
     
     data_dict = session.get('data_dict')
+    image = cache_image(data_dict.get('image'))
     message = data_dict.get('message')
     room_name = data_dict.get('room_name') 
     david_lp = data_dict.get('character').get('Health')
@@ -76,7 +87,7 @@ def game():
 
         if room_name:
             room = engine.match_room(room_name)
-            return render_template("show_room.html", room=room, message=message)
+            return render_template("show_room.html", room=room, message=message, image=image)
         else:
             session['alive'] = False
             return render_template("error.html")
