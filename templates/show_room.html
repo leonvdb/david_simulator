@@ -1,24 +1,15 @@
-{% extends "layout.html" %}
-
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 
 <h1> {{ room.name }} </h1>
 
-<pre>
-{{ room.description }}
-</pre>
+<form action="/game" method="POST" name="action_form" autocomplete="off" spellcheck="false">
+    <input type="text" name="action" required=False>
+</form>
 
-{% if room.name in ["death", "The End"] %}
-    <p><a href ="/">Play Again?</a></p>
-{% else %}
-    <form action="/game" method="POST" name="action_form" autocomplete="off" spellcheck="false">
-         <input type="text" name="action">
-    </form>
-{% endif %}
 
-{% if action_name %}
+{% if message %}
 <div class="output">
-    <p>> {{ action_name }}</p>
+    <p>> {{ message }}</p>
 </div>
 {% endif %}
 <div class=ingame_menu>
@@ -26,4 +17,3 @@
 </div>
 
 {% endblock %}
-

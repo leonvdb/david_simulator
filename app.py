@@ -33,8 +33,8 @@ def index():
         if new_game: #TODO: Add - are you sure? prompt
             session['room_name'] = planisphere.START
             session['alive'] = True
-            session['final_action'] = False
-            session['data_dict'] = {'final_action' : False,
+            session['data_dict'] = {'message' : False,
+            'room_name': 'davids_room',
                 'character' : {
                     'Health': 100,
                     'Attack_Points': 20,
@@ -62,9 +62,10 @@ def game():
     'Health': 100,
     'Attack_Points': 20
 }
-    action_name = session.get('final_action')
-    room_name = session.get('room_name')
+    
     data_dict = session.get('data_dict')
+    message = data_dict.get('message')
+    room_name = data_dict.get('room_name') 
     david_lp = data_dict.get('character').get('Health')
 
     if request.method == "GET":
@@ -75,10 +76,10 @@ def game():
 
         if room_name:
             room = engine.match_room(room_name)
-            return render_template("show_room.html", room=room, action_name=action_name)
+            return render_template("show_room.html", room=room, message=message)
         else:
-            #TODO: Add Error
-            return render_template("you_died.html")
+            session['alive'] = False
+            return render_template("error.html")
 
     else:
         action = request.form.get('action')
@@ -87,18 +88,9 @@ def game():
             room = engine.match_room(room_name)
 
             action_instance = engine.Action(room, action, data_dict)
-            final_action = action_instance.determine_action()
+            data_dict = action_instance.determine_action()
 
-            if action_instance.action_type != 'go':
-
-                session['room_name'] = engine.name_room(room)
-                session['final_action'] = final_action.get('final_action')
-                session['data_dict'] = final_action
-            else:
-
-                session['room_name'] = final_action.get('final_action')
-                session['data_dict'] = final_action
-                session['final_action'] = False
+            session['data_dict'] = data_dict
 
         return redirect(url_for("game"))
 

@@ -158,7 +158,7 @@ class Action(object):
         message = message.replace('[', '')
         message = message.replace(']', '')
         message = message.replace("'", "")
-        self.data_dict['final_action'] = message 
+        self.data_dict['message'] = message 
         return self.data_dict
 
     def gamestate(self):
@@ -179,7 +179,7 @@ class Action(object):
         Angriffspunkte: {ap}
         Inventar: {invetory_str}
         """)
-        self.data_dict['final_action'] = message 
+        self.data_dict['message'] = message 
         return self.data_dict
 
     def take(self):
@@ -212,7 +212,7 @@ class Action(object):
             message = dedent(f"""
             Das Objekt \"{query_item.german_name}\" wurde deinem Inventar hinzugefügt!
             """)
-            self.data_dict['final_action'] = message 
+            self.data_dict['message'] = message 
             return self.data_dict
 
     def attack(self, request_mode):
@@ -279,7 +279,7 @@ class Action(object):
                     message = message + f"""
                     Du hast {query_opponent.german_name} besiegt!
                     """
-                self.data_dict['final_action'] = message 
+                self.data_dict['message'] = message 
                 return self.data_dict
 
     def consume(self):
@@ -337,7 +337,7 @@ class Action(object):
                 message = message + f"""
                 David erhät neuen Status {consumable_special}.
                 """
-            self.data_dict['final_action'] = message 
+            self.data_dict['message'] = message 
             return self.data_dict
 
     def go(self):
@@ -347,10 +347,14 @@ class Action(object):
 
             if self.directions[0] in self.current_room.paths:
                 self.data_dict['room_log'].append(self.directions[0])
-                self.data_dict['final_action'] = self.directions[0]
+                self.data_dict['room_name'] = self.directions[0]
+                query_room=planisphere.Room.query.filter_by(name=self.directions[0]).first()
+                self.data_dict['message'] = query_room.description
                 return self.data_dict
             elif self.directions[0] == 'back' and len(self.data_dict['room_log']) > 1:
-                self.data_dict['final_action'] = self.data_dict['room_log'][len(self.data_dict['room_log']) - 2]
+                self.data_dict['room_name'] = self.data_dict['room_log'][len(self.data_dict['room_log']) - 2]
+                query_room=planisphere.Room.query.filter_by(name=self.data_dict['room_name']).first()
+                self.data_dict['message'] = query_room.description
                 return self.data_dict
             elif self.directions[0] == 'back' and len(self.data_dict['room_log']) <= 1:
                 return self.error('cannot go back')
@@ -406,7 +410,7 @@ class Action(object):
                 Es wurde deinem Inventar hinzugefügt!
                 """)
 
-                self.data_dict['final_action'] = message 
+                self.data_dict['message'] = message 
                 return self.data_dict
 
             else:
@@ -415,5 +419,5 @@ class Action(object):
                 Dir fehlen noch folgende Objekte: {missing}.
                 """)
 
-                self.data_dict['final_action'] = message 
+                self.data_dict['message'] = message 
                 return self.data_dict

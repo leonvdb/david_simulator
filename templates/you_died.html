@@ -1,4 +1,35 @@
-<h1>You Died!</h1>
+<!Doctype html>
+<html>
 
-<p>Looks like you bit the dust.</p>
-<p><a href="/">Play Again</a></p>
+<head>
+    <title>David Simulator</title>
+    <link rel="stylesheet" type="text/css " href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0%;
+            width: 100%;
+        }
+
+
+        .bg {
+            background-image: url("/static/images/dead.jpg");
+            background-color: grey;
+            height: 100%;
+            width: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+<div class="bg">
+    <h1>You Died!</h1>
+    <p><a href="/">Play Again</a></p>
+</div>
+</body>
+
+</html>
