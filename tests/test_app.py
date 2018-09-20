@@ -59,6 +59,31 @@ def test_game(client):
     assert rv.status_code == 200
     assert b'Farbe' in rv.data
 
+    data = {'action': 'guck die farbe an und den sessel an.'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'zu viele' in rv.data
+
+    data = {'action': 'guck die Sahne.'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'kein' in rv.data
+
+    data = {'action': 'guck die Kerze.'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'weder' in rv.data
+
+    data = {'action': 'guck die pflanze an.'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Merkmale' in rv.data
+
+    data = {'action': 'guck das bett an.'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'gemuetlich' in rv.data
+
     data = {'action': 'geh in den flur'}
     rv = client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200

@@ -52,7 +52,8 @@ class Item(db.Model):
     weapon_ap = db.Column(db.Integer)
     fight_ap = db.Column(db.Integer)
     fight_lp = db.Column(db.Integer)
-    amount_in_inventory = db.Column(db.Integer, default=0)
+    description_german = db.Column(db.String)
+    description_english = db.Column(db.String)
 
     recipes = db.relationship('Item',
     secondary=recipes,

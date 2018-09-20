@@ -134,6 +134,8 @@ class Action(object):
             return self.where()
         elif 'what' in self.verbs:
             return self.what()
+        elif 'inspect' in self.verbs:
+            return self.inspect()
         else:
             pass
     
@@ -407,6 +409,7 @@ class Action(object):
                 return self.data_dict
     
     def where(self):
+        self.action_type = 'where'
         query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
         paths = [i.german_name for i in query_room.paths.all()] + [j.german_name for j in query_room.connections.all()]
         paths_str = ", ".join(paths)
@@ -415,9 +418,31 @@ class Action(object):
         return self.data_dict
 
     def what(self):
+        self.action_type = 'what'
         query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
         objects = [k.german_name for k in planisphere.Item.query.filter_by(location=query_room).all()]
         objects_str = ", ".join(objects)
         message = F"""Folgende Gegenstände befinden sich in diesem Raum: {objects_str}"""
         self.data_dict['message'] = message 
         return self.data_dict
+
+    def inspect(self):
+        self.action_type = 'inspect'
+        if self.object_count > 1:
+            return self.error('too many objects')
+        elif self.object_count < 1:
+            return self.error('no objects')
+        else:
+            query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
+
+            if query_item.name not in self.data_dict['character']['Inventory'] and query_item.name not in self.current_room.object_names:
+                    return self.error('object not available')
+            else:
+                if query_item.description_german:
+                    message = F"""{query_item.description_german} """
+                else:
+                    message = F"""Das Objekt {self.objects_original[0]} hat keine besonderen Merkmale."""
+
+                self.data_dict['message'] = message
+                return self.data_dict
+                

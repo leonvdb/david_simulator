@@ -62,7 +62,7 @@ def set_up():
     bomb = Item(name="bomb", english_name="Bomb", german_name="Bombe")
     plant = Item(name="plant", english_name="Plant", german_name="Pflanze", location=davids_room, takeable=True, consume_lp=10)
     monster = Item(name="monster", english_name="Hair Monster", german_name="Haar Monster", location=bathroom, fight_ap=20, fight_lp=140)
-    bed = Item(name="bed", english_name="Bed", german_name="Bett", location=davids_room, fight_ap=0, fight_lp=10)
+    bed = Item(name="bed", english_name="Bed", german_name="Bett", location=davids_room, fight_ap=0, fight_lp=10, description_german="Dass Bett sieht sehr gemuetlich aus.", description_english="The bed looks very comfortable.")
     pfeffi = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=davids_room, consume_lp=5, consume_ap=5, takeable=True)
     b12 = Item(name="b12", english_name="B12", german_name="B12", location=bathroom, takeable=True, consume_lp=20, consume_ap=10)
     pfeffi2 = Item(name="pfeffi", english_name="Pfeffi", german_name="Pfeffi", location=kitchen, consume_lp=5, consume_ap=5, takeable=True)
