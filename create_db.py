@@ -50,7 +50,6 @@ def set_up():
     hallway.connections.append(living_room)
     hallway.connections.append(leons_room)
     kitchen.connections.append(fridge)
-    fridge.connections.append(hallway)
     db.session.commit()
 
 

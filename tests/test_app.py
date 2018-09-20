@@ -49,6 +49,16 @@ def test_game(client):
     assert rv.status_code == 200
     assert b'nirgendwo' in rv.data
 
+    data = {'action': 'wohin'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Flur' in rv.data
+
+    data = {'action': 'welche'}
+    rv = client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b'Farbe' in rv.data
+
     data = {'action': 'geh in den flur'}
     rv = client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -92,6 +102,11 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b"wurde deinem Inventar" in rv.data
+
+    data = {'action': 'geh zurück'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b"Kitchen" in rv.data
 
     data = {'action': 'gamestate'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

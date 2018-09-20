@@ -44,6 +44,10 @@ synonyms_dict = {
     'bauen': 'build',
     'basteln': 'build',
     'bastel': 'build',
+    'wo': 'where',
+    'wohin': 'where',
+    'was': 'what',
+    'welche': 'what',
     ### ITEM SYNONYMS ###
     'pflanze': 'plant',
     'messer': 'knife'
@@ -53,7 +57,7 @@ synonyms_dict = {
 two_word_names = {'davids': {'zimmer': 'davids_room'},
                   'leons': {'zimmer': 'leons_room'}}
 
-verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build']
+verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build', 'where', 'what']
 
 object_names = ['build_test', 'ingredient1', 'ingredient2']
 

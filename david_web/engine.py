@@ -130,6 +130,10 @@ class Action(object):
             return self.gamestate()
         elif 'build' in self.verbs:
             return self.build()
+        elif 'where' in self.verbs:
+            return self.where()
+        elif 'what' in self.verbs:
+            return self.what()
         else:
             pass
     
@@ -401,3 +405,19 @@ class Action(object):
 
                 self.data_dict['message'] = message 
                 return self.data_dict
+    
+    def where(self):
+        query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
+        paths = [i.german_name for i in query_room.paths.all()] + [j.german_name for j in query_room.connections.all()]
+        paths_str = ", ".join(paths)
+        message = F"""Folgende Richtungen stehen zur verfügung: {paths_str}"""
+        self.data_dict['message'] = message 
+        return self.data_dict
+
+    def what(self):
+        query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
+        objects = [k.german_name for k in planisphere.Item.query.filter_by(location=query_room).all()]
+        objects_str = ", ".join(objects)
+        message = F"""Folgende Gegenstände befinden sich in diesem Raum: {objects_str}"""
+        self.data_dict['message'] = message 
+        return self.data_dict
