@@ -273,6 +273,7 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b'konsumiert' in rv.data
+    assert b'Superdrunk' in rv.data
 
     data = {'action': 'geh zurück'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

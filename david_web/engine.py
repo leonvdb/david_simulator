@@ -90,7 +90,6 @@ class Action(object):
         self.object_count = 0
         self.action_type = ''
         self.with_action = False
-        self.special_message = None
 
     def scan_action(self):
         scanned_action = lexicon.scan(self.action)
@@ -109,7 +108,7 @@ class Action(object):
             elif i[1] == 'with':
                 self.with_action = True
 
-    def determine_action(self, request_mode=None):
+    def determine_action(self):
 
         self.scan_action()
 
@@ -124,7 +123,7 @@ class Action(object):
         elif 'consume' in self.verbs:
             return self.consume()
         elif 'attack' in self.verbs:
-            return self.attack(request_mode)
+            return self.attack()
         elif 'take' in self.verbs:
             return self.take()
         elif 'gamestate' in self.verbs:
@@ -209,7 +208,7 @@ class Action(object):
             self.data_dict['message'] = message 
             return self.data_dict
 
-    def attack(self, request_mode):
+    def attack(self):
         self.action_type = 'attack'
         if self.object_count > 1 and self.with_action == False:
             return self.error('too many opponents')
@@ -234,10 +233,6 @@ class Action(object):
                     return self.error('weapon not in inventory')
                 if not query_weapon.weapon_ap:
                     return self.error('not a valid weapon')
-            if self.objects[0] in list(special_actions.attack.keys()):
-                action_data = special_actions.attack.get(self.objects[0])
-                if action_data.get('message') != 'none':
-                    self.special_message = action_data.get('message')
             if query_opponent.name not in self.data_dict['opponents'].keys():
                 self.data_dict['opponents'][query_opponent.name] = {'ap': query_opponent.fight_ap, 'lp': query_opponent.fight_lp}
 
@@ -306,9 +301,7 @@ class Action(object):
             david_lp = self.data_dict['character'].get('Health')
             consumable_ap = query_item.consume_ap
             consumable_lp = query_item.consume_lp
-            consumable_special = query_item.special
             
-
             message = f"""
             David konsumiert {query_item.german_name}.
             """
@@ -323,14 +316,8 @@ class Action(object):
                 message = message + f"""
                 David bekommt {consumable_lp} Lebenspunkte von {query_item.german_name}.
                 """
-            if consumable_special:             
-                self.data_dict['character']['States'].append(consumable_special)
-                message = message + f"""
-                David erhät neuen Status {consumable_special}.
-                """
             self.data_dict['message'] = message 
-            return self.data_dict
-
+            return special_actions.special_actions(self,self.data_dict)
     def go(self):
 
         if self.directions:

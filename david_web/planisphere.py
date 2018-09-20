@@ -52,7 +52,6 @@ class Item(db.Model):
     weapon_ap = db.Column(db.Integer)
     fight_ap = db.Column(db.Integer)
     fight_lp = db.Column(db.Integer)
-    special = db.Column(db.String(100))
     amount_in_inventory = db.Column(db.Integer, default=0)
 
     recipes = db.relationship('Item',
