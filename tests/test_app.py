@@ -118,6 +118,12 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b"wurde deinem Inventar" in rv.data
 
+    data = {'action': 'what'}
+    rv = new_client.post('/game', follow_redirects=True, data=data)
+    assert rv.status_code == 200
+    assert b"Pfeffi" in rv.data
+    assert b"Brotmesser" not in rv.data
+
     data = {'action': 'öffne den Kühlschrank'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200

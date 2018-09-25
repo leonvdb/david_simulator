@@ -136,6 +136,8 @@ class Action(object):
             return self.what()
         elif 'inspect' in self.verbs:
             return self.inspect()
+        elif 'use' in self.verbs:
+            return self.use()
         else:
             pass
     
@@ -420,7 +422,12 @@ class Action(object):
     def what(self):
         self.action_type = 'what'
         query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
-        objects = [k.german_name for k in planisphere.Item.query.filter_by(location=query_room).all()]
+        objects = [k.id for k in planisphere.Item.query.filter_by(location=query_room).all()]
+        print(self.data_dict.get('taken_items'))
+        for i in self.data_dict.get('taken_items'):
+            if i in objects:
+                objects.remove(i)
+        objects = [planisphere.Item.query.filter_by(id=j).first().german_name for j in objects]
         objects_str = ", ".join(objects)
         message = F"""Folgende Gegenstände befinden sich in diesem Raum: {objects_str}"""
         self.data_dict['message'] = message 
@@ -446,3 +453,16 @@ class Action(object):
                 self.data_dict['message'] = message
                 return self.data_dict
                 
+    def use(self):
+        self.action_type = 'use'
+        if self.object_count > 1:
+            return self.error('too many objects')
+        elif self.object_count < 1:
+            return self.error('no objects')
+        else:
+            query_item = planisphere.Item.query.filter_by(name=self.objects[0]).first()
+
+            if query_item.name not in self.data_dict['character']['Inventory'] and query_item.name not in self.current_room.object_names:
+                    return self.error('object not available')
+        self.data_dict['message'] = F"""Das angegebene Objekt {self.objects_original[0]} kannst du nich benutzen."""
+        return special_actions.special_actions(self,self.data_dict)

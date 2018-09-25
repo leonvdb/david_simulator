@@ -21,6 +21,10 @@ def special_actions(action,data_dict):
             data_dict = append_state('Superdrunk', data_dict, 'Drunk')
         elif action.objects[0] == 'pfeffi' and 'Superdrunk' in  data_dict['character']['States']:
             data_dict = append_state('Crazydrunk', data_dict, 'Superdrunk')
+    elif action.action_type == 'use':
+        if action.objects[0] == 'chair':
+            data_dict['image'] = '/static/images/on_the_phone.jpg'
+            data_dict['message'] = "David macht es sich auf dem Sessel gemütlich und checkt Instagram"
     return data_dict
 
 def append_state(state_name, data_dict, remove_me=None):

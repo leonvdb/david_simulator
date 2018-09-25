@@ -44,6 +44,7 @@ synonyms_dict = {
     'bauen': 'build',
     'basteln': 'build',
     'bastel': 'build',
+    'benutz': 'use',
     'wo': 'where',
     'richtungen': 'where',
     'wohin': 'where',
@@ -67,7 +68,7 @@ synonyms_dict = {
 two_word_names = {'davids': {'zimmer': 'davids_room'},
                   'leons': {'zimmer': 'leons_room'}}
 
-verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build', 'where', 'what', 'inspect']
+verb_names = ['take', 'go', 'consume', 'attack', 'gamestate', 'build', 'where', 'what', 'inspect', 'use']
 
 object_names = ['build_test', 'ingredient1', 'ingredient2']
 
