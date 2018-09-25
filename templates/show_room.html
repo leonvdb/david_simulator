@@ -6,6 +6,67 @@
     <input type="text" name="action" required=False>
 </form>
 
+{% if new_game %}
+<div class="tutorial">
+<h3>Wilkommen beim David Simulator 2018!</h3>
+<p>Dies ist eine authentische Simulation von Davids Leben, <br>
+    mit all seinen details und tiefen. <br>
+    <br>
+    Benutz die Eingabeleiste am unteren Rand um David zu steuern:<br>
+    Es gibt verschiedene befehle wie z.b. "Geh", "Nimm", "Iss", "Attackier",
+    "Benutz" oder "Betrachte". Probier einfach aus und schau was passiert!<br>
+    <br>
+    Du kannst mit allen grün umrandeten Objekten interagieren und die meisten
+    Türen benutzen die du sehen kannst. Falls du dir mal nicht sicher bist,
+    welche Richtungen und Gegenstände dir zur verfügung stehen kannst du "Wohin?"
+    oder "Was?" als Befehl angeben.<br>
+    <br>
+    Mit dem "Charakter" Befehl kannst du dein Inventar, sowie deine Lebens- 
+    und Angriffspunkte, und deine Staten ansehen.<br>
+    <br>
+    Falls du während der Simulation Hilfe brauchst klick einfach 
+    auf das Hilfe Symbol das sich oben rechts im Fenster befindet.<br>
+    <br>
+    Viel Spaß!
+</p>
+<form action="/game" method="POST">
+    <button type="submit" name="tutorial_off" value=False>OK</button>
+</form>
+</div>
+{% endif %}
+
+{% if show_help %}
+<div class="tutorial">
+<p>
+    Benutz die Eingabeleiste am unteren Rand um David zu steuern:<br>
+    Es gibt verschiedene befehle wie z.b. "Geh", "Nimm", "Iss", "Attackier",
+    "Benutz" oder "Betrachte". Probier einfach aus und schau was passiert!<br>
+    <br>
+    Z.b. kannst du schreiben: "Geh in den Flur" oder "Nimm die Pflanze" 
+    und bestätige dann mit der Enter Taste.
+    <br>
+    Du kannst mit allen grün umrandeten Objekten interagieren und die meisten
+    Türen benutzen die du sehen kannst. <br>
+    <br>
+    Falls du dir mal nicht sicher bist,
+    welche Richtungen und Gegenstände dir zur verfügung stehen kannst du "Wohin?"
+    oder "Was?" als Befehl angeben.<br>
+    <br>
+    Mit dem "Charakter" Befehl kannst du dein Inventar, sowie deine Lebens- 
+    und Angriffspunkte, und deine Staten ansehen.<br>
+    <br>
+    Falls du während der Simulation Hilfe brauchst klick einfach 
+    auf das Hilfe Symbol das sich oben rechts im Fenster befindet.<br>
+    <br>
+    Falls du hilfe brauchst, die du hier nicht finden kannst oder du einen Fehler
+    gefunden hast schreib mir bitte eine Nachricht an: <br>
+    leon.vondemberge@gmail.com
+</p>
+<form action="/game" method="POST">
+    <button type="submit" name="help_off" value=True>OK</button>
+</form>
+</div>
+{% endif %}
 
 {% if message %}
 <div class="output">
@@ -13,7 +74,10 @@
 </div>
 {% endif %}
 <div class=ingame_menu>
-    <p><a href="/">Home</a></p>
+        <a href="/" title="Home"><img src="/static/icons/home.png"></a>
+        <form action="/game" method="POST">
+        <button type="submit" name="help_request" value=True><img src="/static/icons/help.png"></button>
+    </form>
 </div>
 
 {% endblock %}

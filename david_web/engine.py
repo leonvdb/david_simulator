@@ -423,7 +423,6 @@ class Action(object):
         self.action_type = 'what'
         query_room=planisphere.Room.query.filter_by(id=self.current_room.id).first()
         objects = [k.id for k in planisphere.Item.query.filter_by(location=query_room).all()]
-        print(self.data_dict.get('taken_items'))
         for i in self.data_dict.get('taken_items'):
             if i in objects:
                 objects.remove(i)

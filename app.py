@@ -42,6 +42,7 @@ def index():
         if new_game: #TODO: Add - are you sure? prompt
             session['room_name'] = planisphere.START
             session['alive'] = True
+            session['new_game'] = True
             session['data_dict'] = {'message' : False,
             'image' : 'static/images/davids_room.jpg',
             'room_name': 'davids_room',
@@ -68,17 +69,14 @@ def index():
 
 @app.route("/game", methods=['GET', 'POST'])
 def game():
-    session['character_stats'] = {
-    'Health': 100,
-    'Attack_Points': 20
-}
-    
+    new_game = session.get('new_game')
     data_dict = session.get('data_dict')
     image = cache_image(data_dict.get('image'))
     message = data_dict.get('message')
-    room_name = data_dict.get('room_name') 
+    room_name = data_dict.get('room_name')
     david_lp = data_dict.get('character').get('Health')
-
+    show_help = session.get('show_help')
+    
     if request.method == "GET":
 
         if david_lp <= 0:
@@ -87,22 +85,32 @@ def game():
 
         if room_name:
             room = engine.match_room(room_name)
-            return render_template("show_room.html", room=room, message=message, image=image)
+            return render_template("show_room.html", room=room, message=message, image=image, new_game=new_game, show_help=show_help)
         else:
             session['alive'] = False
             return render_template("error.html")
 
     else:
+        tutorial = request.form.get('tutorial_off')
+        help_request = request.form.get('help_request')
+        help_off = request.form.get('help_off')
         action = request.form.get('action')
 
+        if tutorial:
+            session['new_game']=False
+        if help_request:
+            session['new_game']=False
+            session['show_help']=True
+        if help_off:
+            session['show_help']=False
         if room_name and action:
+            session['new_game']=False
             room = engine.match_room(room_name)
 
             action_instance = engine.Action(room, action, data_dict)
             data_dict = action_instance.determine_action()
 
             session['data_dict'] = data_dict
-
         return redirect(url_for("game"))
 
 
