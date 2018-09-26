@@ -115,6 +115,9 @@ def game():
             session['data_dict'] = data_dict
         return redirect(url_for("game"))
 
+@app.route("/about", methods=['GET', 'POST'])
+def about():
+    return render_template('about.html')
 
 app.secret_key = secrets.secret_app_key
 
