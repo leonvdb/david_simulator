@@ -119,6 +119,10 @@ def game():
 def about():
     return render_template('about.html')
 
+@app.route("/credits", methods=['GET', 'POST'])
+def credits():
+    return render_template('credits.html')
+
 app.secret_key = secrets.secret_app_key
 
 if __name__ == "__main__":

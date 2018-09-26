@@ -188,3 +188,59 @@ border-style: none;
     display: inline-block;
     max-width: 80%;
 }
+
+.credit-container {
+    position: absolute;
+    top: 10%;
+    width: 70%;
+    right: 12%;
+}
+
+.credit-container h4{
+    color:  rgba(255, 254, 254, 0.692);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.credit-container td{
+    margin: 0px;
+    /* text-align: left; */
+
+}
+.credit-container td, .credit-container th {
+    border-right: 50px solid rgba(255, 254, 254, 0);
+    text-align: center;
+}
+
+.credit-container img{
+    width: 30px;
+    height: 30px;
+    display: block;
+    margin-top: 0;
+    margin-left: 20px;
+    position: relative;
+
+}
+
+#kolja_insta {
+    display: inline-block;
+    position: relative;
+    left: 10px;
+
+
+}
+
+#kolja2 {
+    position: relative;
+    left: 52px;
+}
+
+#leon_dev {
+    position: relative;
+    left: 17px;
+}
+
+#luzius, #leon_ed {
+    position: relative;
+    left: 27px;
+}
+
