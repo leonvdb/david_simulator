@@ -27,12 +27,18 @@
 <Body>
     <div class=bg>
         <div class=menu>
+            <table>
+                <tr>
             <form action="/" method="POST">
-                <button type="submit" name="new_game" value=True>Neues Spiel</button>
+               <th><button type="submit" name="new_game" value=True>Neues Spiel</button></th> 
                 {% if player_data %}
-                <button type="submit" name="continue_game" value=True>Spiel fortsetzten</button>
-                {% endif %}
+                <th><button type="submit" name="continue_game" value=True>Spiel fortsetzten</button></th>
+                {% endif %}      
             </form>
+            <th><a href="/about">About</a></th>
+            <th><a href="/credits">Credits</a></th>
+        </tr>
+        </table>
         </div>
     </div>
 </Body>

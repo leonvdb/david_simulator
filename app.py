@@ -40,6 +40,7 @@ def index():
         new_game = request.form.get('new_game')
         continue_game = request.form.get('continue_game')
         if new_game: #TODO: Add - are you sure? prompt
+            session['show_help']=False
             session['room_name'] = planisphere.START
             session['alive'] = True
             session['new_game'] = True
@@ -58,6 +59,7 @@ def index():
         }
             return redirect(url_for("game"))
         elif continue_game:
+            session['show_help']=False
             return redirect(url_for("game"))
         else:
             #TODO: Add Error
@@ -76,7 +78,7 @@ def game():
     room_name = data_dict.get('room_name')
     david_lp = data_dict.get('character').get('Health')
     show_help = session.get('show_help')
-    
+
     if request.method == "GET":
 
         if david_lp <= 0:

@@ -2,6 +2,10 @@ h1 {
     margin :0px;
 }
 
+button{
+    outline: none;
+}
+
 input[type=text] {
     display: block;
     width: 98%;
@@ -72,25 +76,82 @@ input[type=text] {
 }
 
 .menu {
+    /* border-radius: 10px; */
+    width: fit-content;
     position: absolute;
-    top: 20%;
-    right: 10%;
-    background-color: rgba(0, 0, 0, 0.514);
+    top: 5%;
+    right: 5%;
+    background-color: rgba(0, 0, 0, 0.55);
     color: White;
     font-family: 'Courier New', Courier, monospace;
-
+    font-weight: 50;
+    white-space: nowrap;
+    overflow-x: auto;
+    box-shadow: 3px 4px 2px 2px rgba(0, 0, 0, 0.3);
 }
 
-.menu a {
+.menu button {
+    margin: 0;
+    border-style: none;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0.65em;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+    float: left;
+}
+
+.menu a{
+    padding: 0.65em;
+}
+
+.menu th, tr, table, tbody {
+    border-collapse: collapse;
+    padding: 0;
+    margin: 0;
+}
+
+.menu a, .menu button {
     color: white;
     text-decoration: none;
+    display: inline-block;
+    font-weight: 200;
 }
 
-.menu a:hover {
-    color: gray;
+.menu a:hover, .menu button:hover {
+    box-shadow: inset 2px 2px 3px 2px rgba(0, 0, 0, 0.25)
+}
+
+.menu a:active, .menu button:active {
+    box-shadow: inset 3px 3px 4px 3px rgba(0, 0, 0, 0.35)
 }
 
 ul {
     list-style: none;
     padding: 0;
+}
+
+.death {
+padding: 0;
+margin: 0px;
+font-family: Arial, Helvetica, sans-serif;
+position: relative;
+top: 35%;
+text-align: center;
+color: white;
+font-weight: 30;
+border-style: none;
+}
+
+.death h3 {
+    margin: 0%;
+}
+
+.death a {
+    margin: 0px;
+    color: white;
+    text-decoration: none;
+    position: relative;
+    top: 13em;
+    padding: 1em;
+    border: 1px solid white;
 }
