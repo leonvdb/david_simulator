@@ -168,9 +168,9 @@ class Action(object):
         for k, v in self.data_dict['character']['Inventory'].items():
             query_item = planisphere.Item.query.filter_by(name=k).first()
             if v > 1:
-                inventory_list.append(f'{query_item.english_name} ({v}x)')
+                inventory_list.append(f'{query_item.german_name} ({v}x)')
             else: 
-                inventory_list.append(query_item.english_name)
+                inventory_list.append(query_item.german_name)
 
         invetory_str = ','.join(inventory_list)
         states_str = ','.join(states)
@@ -179,7 +179,7 @@ class Action(object):
         Lebenspunkte: {lp}
         Angriffspunkte: {ap}
         Inventar: {invetory_str}
-        States: {states_str}
+        Status: {states_str}
         """)
         self.data_dict['message'] = message 
         return self.data_dict
@@ -451,7 +451,7 @@ class Action(object):
                     message = F"""Das Objekt {self.objects_original[0]} hat keine besonderen Merkmale."""
 
                 self.data_dict['message'] = message
-                return self.data_dict
+                return special_actions.special_actions(self,self.data_dict)
                 
     def use(self):
         self.action_type = 'use'

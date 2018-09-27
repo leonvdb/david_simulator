@@ -8,6 +8,7 @@ synonyms_dict = {
     'davidszimmer': 'davids_room',
     'raus': 'outside',
     'badezimmer': 'bathroom',
+    'bad':'bathroom',
     'küche': 'kitchen',
     'wohnzimmer': 'living_room',
     'kühlschrank': 'fridge',
