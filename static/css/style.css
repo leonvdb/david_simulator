@@ -26,13 +26,26 @@ input[type=text] {
     
 }
 
+#location {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    position: absolute; 
+    left:1%;
+    background-color: rgba(0, 0, 0, 0.514);
+    color:  rgba(255, 255, 255, 0.952);
+    padding: 1em; 
+    box-shadow: 3px 4px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
 .tutorial {
     width: 30%;
     padding: 1.5em;
     background-color: rgba(0, 0, 0, 0.692);
     color:  rgba(255, 255, 255, 0.87);
-    margin: auto;
-    margin-top: 50px;
+    left: 35%;
+    top: 13%;
+    position: absolute;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: 200;
     font-size: 0.85em;
@@ -64,9 +77,12 @@ input[type=text] {
 }
 
 .ingame_menu {
+    background-color: rgba(0, 0, 0, 0.514);
     position: absolute;
     right: 0.5%;
     top: 0%;
+    padding: 1em; 
+    box-shadow: -3px 4px 2px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ingame_menu button {

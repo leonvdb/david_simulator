@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block content %}
 
-<h1> {{ room.name }} </h1>
+<p id="location"> Aktueller Standort: <br> {{ room.german_name }} </p>
 
 <form action="/game" method="POST" name="action_form" autocomplete="off" spellcheck="false">
     <input type="text" name="action" required=False>

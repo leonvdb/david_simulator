@@ -19,8 +19,9 @@ db.app = app
 class Room(object):
     instances = []
 
-    def __init__(self, name, description, paths, object_names, db_id):
+    def __init__(self, name,german_name, description, paths, object_names, db_id):
         self.name = name
+        self.german_name = german_name
         self.description = description
         self.paths = paths
         self.object_names = object_names
@@ -38,8 +39,8 @@ class ProcessDirector:
     def __init__(self):
         self.allClasses = []
 
-    def construct(self, id_name, name, description, paths, objects, db_id):
-        instance = Room(name, description, paths, objects, db_id)
+    def construct(self, id_name, name, german_name, description, paths, objects, db_id):
+        instance = Room(name,german_name, description, paths, objects, db_id)
         self.allClasses.append(instance)
         ProcessDirector.instance_id[id_name] = instance
 
@@ -52,7 +53,7 @@ def initalise_rooms():
         paths = [j.name for j in i.connections.all()] + [j.name for j in i.paths.all()]
         objects = [k.name for k in planisphere.Item.query.filter_by(location=i).all()]
         
-        director.construct(i.name, i.english_name, i.description, paths, objects, i.id)
+        director.construct(i.name, i.english_name, i.german_name, i.description, paths, objects, i.id)
 
 
 initalise_rooms()
