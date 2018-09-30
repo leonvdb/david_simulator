@@ -4,3 +4,4 @@
 to_do_list.txt
 config/secrets.py
 .vscode
+*.log

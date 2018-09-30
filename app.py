@@ -6,15 +6,22 @@ from david_web import planisphere
 from config import secrets # pylint: disable-msg=E0611
 from werkzeug.contrib.cache import SimpleCache
 import sys
+import logging
+
+logging.basicConfig(filename='david_simulator.log' ,level=logging.INFO)
+logger = logging.getLogger(__name__)    
 
 if __name__ == "__main__" or "pytest" in sys.modules:
     from david_web import engine
+    logger.info('Running Application')
 
 app = Flask(__name__)
+logger.info('Connecting to Database')
 app.config['SQLALCHEMY_DATABASE_URI'] = secrets.database_uri
 
 db.init_app(app)
 db.app = app
+logger.info('Database initialized')
 
 cache = SimpleCache()
 
@@ -71,6 +78,7 @@ def index():
 
 @app.route("/game", methods=['GET', 'POST'])
 def game():
+    logging.debug('Initializing game page')
     new_game = session.get('new_game')
     data_dict = session.get('data_dict')
     image = cache_image(data_dict.get('image'))
@@ -78,15 +86,18 @@ def game():
     room_name = data_dict.get('room_name')
     david_lp = data_dict.get('character').get('Health')
     show_help = session.get('show_help')
+    logging.debug('data_dict: %s', data_dict)
 
     if request.method == "GET":
-
+        logging.debug('GET method /game')
         if david_lp <= 0:
             session['alive'] = False
             return render_template("you_died.html")
 
         if room_name:
+            logging.debug('Loading Room')
             room = engine.match_room(room_name)
+            logging.debug('Room assigned: %s', room)
             return render_template("show_room.html", room=room, message=message, image=image, new_game=new_game, show_help=show_help)
         else:
             session['alive'] = False
