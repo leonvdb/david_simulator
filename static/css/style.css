@@ -260,3 +260,26 @@ border-style: none;
     left: 27px;
 }
 
+.mobile {
+    max-width: 100%;
+}
+
+.mobile img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mobile p {
+    color:  rgba(255, 254, 254, 0.692);
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgba(0, 0, 0, 0.582);
+    max-width: 80%;
+    height: 20%;
+    padding-top: 20px;
+    position: absolute;
+    left: 10%;
+    bottom: 15%;
+    box-shadow: 3px 4px 2px 2px rgba(0, 0, 0, 0.3);
+    text-align: center;
+} 

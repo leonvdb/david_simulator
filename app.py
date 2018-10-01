@@ -23,6 +23,8 @@ db.init_app(app)
 db.app = app
 logger.info('Database initialized')
 
+
+
 cache = SimpleCache()
 
 def cache_image(image_input):
@@ -34,8 +36,13 @@ def cache_image(image_input):
 
 
 @app.route("/", methods=['GET', 'POST'])
+
 def index():
-    if request.method == "GET":
+    user_agent = request.headers.get('User-Agent')
+    logger.info('User agent: %s', user_agent)
+    if 'Android' in user_agent or 'iphone' in user_agent or 'blackberry' in user_agent:
+        return render_template("index_mobile.html")
+    elif request.method == "GET":
         if session.get('room_name') and session.get('alive'):
             player_data = True
         else:
