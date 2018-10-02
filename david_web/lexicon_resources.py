@@ -66,7 +66,8 @@ synonyms_dict = {
     'schau': 'inspect',
     ### ITEM SYNONYMS ###
     'pflanze': 'plant',
-    'messer': 'knife'
+    'messer': 'knife',
+    'stuhl': 'chair'
 
 }
 
