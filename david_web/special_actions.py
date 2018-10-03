@@ -91,27 +91,30 @@ def special_actions(action,data_dict):
             data_dict['message'] = F"""Du öffnest die Tonne um den Müllsack reinzuwerfen. Irgendetwas raschelt sehr laut unter dem Koymüll."""
             del data_dict['character']['Inventory']['bin']
     elif action.action_type == 'inspect':
-        if action.objects[0] == 'monster' and data_dict['opponents']['monster']['lp']<=0:
-            data_dict['message'] = F"""Du untersuchst die Monsterleiche genauer und findest eine Notitz:
-            \" Masterplan um auf ewig gemütlich in der Wanne zu liegen: 1. Bombe aus Gasflasche, Kerze und Wecker bauen.
-            2. Mit Bombe Leon in die Luft sprengen damit er das Bad nichtmehr benutzt. 3. Den Legendären Superpfeffi aus dem Späti bekommen.
-            4. David mit Superpfeffi abfüllen damit auch er für immer ausgeschaltet ist.\" """
-        elif action.objects[0] == 'leon' and data_dict['opponents']['leon']['lp']<=0:
-            query_item = planisphere.Item.query.filter_by(name='window_key').first()
-            if query_item.id not in data_dict['taken_items']:
-                data_dict['character']['Inventory'][query_item.name] = 1
-                data_dict['taken_items'].append(query_item.id)
-                data_dict['message'] = F"""Du untersuchst Leons Leiche genauer und findest einen Schlüssel. Der Schlüssel wurde deinem Inventar hinzugefügt."""
+        if action.objects[0] == 'monster' and 'monster' in list(data_dict['opponents'].keys()):
+            if data_dict['opponents']['monster']['lp']<=0:
+                data_dict['message'] = F"""Du untersuchst die Monsterleiche genauer und findest eine Notitz:
+                \" Masterplan um auf ewig gemütlich in der Wanne zu liegen: 1. Bombe aus Gasflasche, Kerze und Wecker bauen.
+                2. Mit Bombe Leon in die Luft sprengen damit er das Bad nichtmehr benutzt. 3. Den Legendären Superpfeffi aus dem Späti bekommen.
+                4. David mit Superpfeffi abfüllen damit auch er für immer ausgeschaltet ist.\" """
+        elif action.objects[0] == 'leon' and 'leon' in list(data_dict['opponents'].keys()):
+            if data_dict['opponents']['leon']['lp']<=0:
+                query_item = planisphere.Item.query.filter_by(name='window_key').first()
+                if query_item.id not in data_dict['taken_items']:
+                    data_dict['character']['Inventory'][query_item.name] = 1
+                    data_dict['taken_items'].append(query_item.id)
+                    data_dict['message'] = F"""Du untersuchst Leons Leiche genauer und findest einen Schlüssel. Der Schlüssel wurde deinem Inventar hinzugefügt."""
         elif action.objects[0] == 'picture':
             data_dict['image'] = '/static/images/picture.jpg'
         elif action.objects[0] == 'wall':
             data_dict['image'] = '/static/images/wall.jpg'
-        elif action.objects[0] == 'mailboxes' and data_dict['opponents']['mailboxes']['lp']<=0:
-            data_dict['message'] = """David öffnet eine der Türen und findet einen Brief der Vigor Hausverwaltung: 
-            Im Innenhof haben wir mit schweren Problemen zu kämpfen. Insbesondere mit dem Rattenkönig der eine Angriffstärke von 
-            1000 und Leben von 20000 hat. Er ist auch sehr schwer zu finden - Wenn man den gelben Müllcontainer öffnet ist 
-            er zwar immernoch nicht zu sehen, aber man kann ihn angreifen! Wer auch immer ihn erlegt dem gebürt hohes lob! 
-            Wenn er erlegt wurde wird nach einem Wort gefragt werden. Das Wort lautet: Bundeskegelbahn."""
+        elif action.objects[0] == 'mailboxes' and 'mailboxes' in list(data_dict['opponents'].keys()):
+            if data_dict['opponents']['mailboxes']['lp']<=0:
+                data_dict['message'] = """David öffnet eine der Türen und findet einen Brief der Vigor Hausverwaltung: 
+                Im Innenhof haben wir mit schweren Problemen zu kämpfen. Insbesondere mit dem Rattenkönig der eine Angriffstärke von 
+                1000 und Leben von 20000 hat. Er ist auch sehr schwer zu finden - Wenn man den gelben Müllcontainer öffnet ist 
+                er zwar immernoch nicht zu sehen, aber man kann ihn angreifen! Wer auch immer ihn erlegt dem gebürt hohes lob! 
+                Wenn er erlegt wurde wird nach einem Wort gefragt werden. Das Wort lautet: Bundeskegelbahn."""
     elif action.action_type == 'what':
         if data_dict['room_name'] == 'yard':
             data_dict['message'] = data_dict.get('message').replace(", Rattenkönig", "")
