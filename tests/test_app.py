@@ -327,17 +327,6 @@ def test_back_home(new_client):
     assert rv.status_code == 200
     assert b"Leons Zimmer" in rv.data
 
-    data = {'action': 'greif Leon an'}
-    rv = new_client.post('/game', follow_redirects=True, data=data)
-    assert rv.status_code == 200
-    assert b"Leons Zimmer" in rv.data
-    assert b"besiegt" in rv.data
-
-    data = {'action': 'betrachte Leon'}
-    rv = new_client.post('/game', follow_redirects=True, data=data)
-    assert rv.status_code == 200
-    assert b'Fenster'
-
     data = {'action': 'nimm den Wecker'}
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
@@ -358,20 +347,6 @@ def test_back_home(new_client):
     rv = new_client.post('/game', follow_redirects=True, data=data)
     assert rv.status_code == 200
     assert b'kannst du nicht bauen'
-
-    data = {'action': 'geh in den flur'}
-    rv = new_client.post('/game', follow_redirects=True, data=data)
-    assert rv.status_code == 200
-    assert b"Flur" in rv.data
-
-    data = {'action': 'geh in die Küche'}
-    rv = new_client.post('/game', follow_redirects=True, data=data)
-    assert rv.status_code == 200
-
-    data = {'action': 'benutz den Schlüssel'}
-    rv = new_client.post('/game', follow_redirects=True, data=data)
-    assert rv.status_code == 200
-    assert b'Joseph' in rv.data
 
     data = {'action': 'geh in den flur'}
     rv = new_client.post('/game', follow_redirects=True, data=data)

@@ -100,6 +100,11 @@ def game():
         if david_lp <= 0:
             session['alive'] = False
             return render_template("you_died.html")
+        
+        if 'ratking' in list(data_dict['opponents'].keys()):
+            if data_dict['opponents']['ratking']['lp']<=0:
+                session['alive'] = False
+                return render_template("you_won.html")
 
         if room_name:
             logging.debug('Loading Room')

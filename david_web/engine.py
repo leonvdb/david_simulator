@@ -400,7 +400,7 @@ class Action(object):
                 """)
 
                 self.data_dict['message'] = message 
-                return self.data_dict
+                return special_actions.special_actions(self,self.data_dict)
 
             else:
                 message =  dedent(f"""
@@ -431,7 +431,7 @@ class Action(object):
         objects_str = ", ".join(objects)
         message = F"""Folgende Gegenstände befinden sich in diesem Raum: {objects_str}"""
         self.data_dict['message'] = message 
-        return self.data_dict
+        return special_actions.special_actions(self,self.data_dict)
 
     def inspect(self):
         self.action_type = 'inspect'

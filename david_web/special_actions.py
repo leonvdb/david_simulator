@@ -9,6 +9,13 @@ def special_actions(action,data_dict):
             data_dict = append_state('muede', data_dict)
         elif action.objects[0] == 'leon' and data_dict['opponents']['leon']['lp']<=0:
             data_dict['image'] = '/static/images/kill_leon.jpg'
+        elif action.objects[0] == 'ratking' and not data_dict['image'] == '/static/images/trash.jpg':
+            data_dict['character']['Health'] += 1000
+            data_dict['opponents']['ratking']['lp'] = 20000
+            return action.error('no opponents')
+        if action.with_action == True:
+            if action.objects[1] == 'bomb':
+                del data_dict['character']['Inventory']['bomb']
     elif action.action_type == 'go':
         if data_dict['room_name'] == 'leons_room' and 'leon' in list(data_dict['opponents'].keys()):
             if data_dict['opponents']['leon']['lp']<=0:
@@ -40,8 +47,22 @@ def special_actions(action,data_dict):
             data_dict['character']['Health'] += 30
             data_dict['message'] = """David konsumiert B12. Als veganer hat es bei David besondere Wirkung!
             David bekommt 20 Angriffspunkte von B12. David bekommt 50 Lebenspunkte von B12."""
+    elif action.action_type == 'build':
+        if action.objects[0] == 'bomb':
+            data_dict['image'] = '/static/images/bomb.jpg'
     elif action.action_type == 'use':
-        if action.objects[0] == 'chair':
+        if action.objects[0] == 'toilet':
+            data_dict['message'] = "David setzt sich auf die Toilette und liest."
+            data_dict['image'] = '/static/images/on_the_toilet.jpg'
+            if 'Techno Viking' in data_dict['character']['States']:
+                data_dict['message'] = "David macht einen riesigen Techno Viking Haufen. Leon verliert 50 Lebenspunkte."
+                if 'leon' not in data_dict['opponents'].keys():
+                    data_dict['opponents']['leon'] = {'ap': 99, 'lp': 4950}
+                else:
+                    data_dict['opponents']['leon']['lp'] -= 50
+        elif action.objects[0] == 'paint' and 'bike' in list(data_dict['character']['Inventory'].keys()):
+            data_dict['message'] = "David malt das Fahrrad an. Schön!"
+        elif action.objects[0] == 'chair':
             data_dict['image'] = '/static/images/on_the_phone.jpg'
             data_dict['message'] = "David macht es sich auf dem Sessel gemütlich und checkt Instagram"
         elif action.objects[0] == 'vinyl':
@@ -56,10 +77,19 @@ def special_actions(action,data_dict):
                 Halloweenkürbis von letztem Jahr. Joseph wurde deinem Inventar hinzugefügt."""
             else:
                 data_dict['message'] = F"""Du machst das Fenster auf, aber hier befindet sich nichts mehr."""
-        
-
-
-
+        elif action.objects[0] == 'joseph' and 'Drunkception' in data_dict['character']['States']:
+            data_dict['message'] = F"""In diesem Zustand von Trunkenheit überkommt es David und er zieht sich Joseph über den Kopf.
+            Ihm wird sehr schwindelig und verliert das Bewusstsein... Als David wieder aufwacht ist er nicht mehr er selbst. Er ist mit 
+            Joseph verschmolzen und hat so Superkräft bekommen. David erhält 9000 Angriffspunkte und 2900 Lebenspunkte."""
+            data_dict['character']['Health'] += 2900
+            data_dict['character']['Attack_Points'] += 9000
+            append_state('Superjoseph', data_dict, 'Drunkception')
+        elif action.objects[0] == 'trash' and 'bin' not in list(data_dict['character']['Inventory'].keys()):
+            data_dict['message'] = F"""Das würdest du wirklich nicht benutzen es sei denn du möchtest Müll loswerden."""
+        elif action.objects[0] == 'trash' and 'bin' in list(data_dict['character']['Inventory'].keys()):
+            data_dict['image'] = '/static/images/trash.jpg'
+            data_dict['message'] = F"""Du öffnest die Tonne um den Müllsack reinzuwerfen. Irgendetwas raschelt sehr laut unter dem Koymüll."""
+            del data_dict['character']['Inventory']['bin']
     elif action.action_type == 'inspect':
         if action.objects[0] == 'monster' and data_dict['opponents']['monster']['lp']<=0:
             data_dict['message'] = F"""Du untersuchst die Monsterleiche genauer und findest eine Notitz:
@@ -74,6 +104,17 @@ def special_actions(action,data_dict):
                 data_dict['message'] = F"""Du untersuchst Leons Leiche genauer und findest einen Schlüssel. Der Schlüssel wurde deinem Inventar hinzugefügt."""
         elif action.objects[0] == 'picture':
             data_dict['image'] = '/static/images/picture.jpg'
+        elif action.objects[0] == 'wall':
+            data_dict['image'] = '/static/images/wall.jpg'
+        elif action.objects[0] == 'mailboxes' and data_dict['opponents']['mailboxes']['lp']<=0:
+            data_dict['message'] = """David öffnet eine der Türen und findet einen Brief der Vigor Hausverwaltung: 
+            Im Innenhof haben wir mit schweren Problemen zu kämpfen. Insbesondere mit dem Rattenkönig der eine Angriffstärke von 
+            1000 und Leben von 20000 hat. Er ist auch sehr schwer zu finden - Wenn man den gelben Müllcontainer öffnet ist 
+            er zwar immernoch nicht zu sehen, aber man kann ihn angreifen! Wer auch immer ihn erlegt dem gebürt hohes lob! 
+            Wenn er erlegt wurde wird nach einem Wort gefragt werden. Das Wort lautet: Bundeskegelbahn."""
+    elif action.action_type == 'what':
+        if data_dict['room_name'] == 'yard':
+            data_dict['message'] = data_dict.get('message').replace(", Rattenkönig", "")
 
     return data_dict
 

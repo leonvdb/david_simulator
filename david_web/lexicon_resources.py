@@ -16,6 +16,7 @@ synonyms_dict = {
     'schliesse': 'back',
     'close': 'back',
     'schliess': 'back',
+    'hof': 'yard',
     ### VERB SYNONYMS GERMAN ###
     'nimm': 'take',
     'nehmen': 'take',
@@ -67,7 +68,10 @@ synonyms_dict = {
     ### ITEM SYNONYMS ###
     'pflanze': 'plant',
     'messer': 'knife',
-    'stuhl': 'chair'
+    'stuhl': 'chair',
+    'müll': 'bin',
+    'mülltonne':'trash',
+    'klo': 'toilet'
 
 }
 
