@@ -1,5 +1,5 @@
 # david_simulator
-David Simulator 2018 - Work in Progress!
+David Simulator 2018!
 
 This is an authentic simulation of Davids life in the year 2018.
 
